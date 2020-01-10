@@ -14,7 +14,6 @@ const { runPreBuildout } = require("./src/pre-buildout-task")
 
 let driver = null
 
-
 // Initialize driver
 const runAutomation = async () => {
   let service = await new chrome.ServiceBuilder(chromePath).build()
@@ -34,8 +33,9 @@ const run = async () => {
 
   // 0. Get data
   plData = await getData()
+  console.log(plData)
   // 1. Prebuildout
-  await runPreBuildout(driver, plData.map(plDataItem => plDataItem.domain))
+  await runPreBuildout(driver, plData)
 }
 
 module.exports.runAutomation = runAutomation()

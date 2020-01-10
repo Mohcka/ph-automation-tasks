@@ -4,7 +4,7 @@ const selHelper = require("./selenium-helpers")
 const { awaitAndClick, awaitAndSendKeys } = require("./selenium-helpers")
 
 let driver = null
-const WAIT_TIME = 30000 // 5 seconds
+const WAIT_TIME = 60000 // 5 seconds
 let currentDomain = null
 
 /**
@@ -22,9 +22,10 @@ const runPreBuildout = async (pulledDriver, domainsList) => {
 
   //TODO: Begin looping through buildouts
   for (let i = 0; i < domainsList.length; i++) {
-    currentDomain = domainsList[i]
+    currentDeal = domainsList[i]
+
     await createNewDomain()
-    // await installWordpress()
+    await installWordpress()
   }
 }
 
@@ -51,11 +52,11 @@ async function createNewDomain() {
   await awaitAndClick(By.css("#buttonAddDomain"))
   // Enter Info
   // Domain name
-  await awaitAndSendKeys(By.id(`domainName-name`), currentDomain)
+  await awaitAndSendKeys(By.id(`domainName-name`), currentDeal.domain)
   // Username
   await awaitAndSendKeys(
     By.id(`domainInfo-userName`),
-    currentDomain.match(/(.*)\./)[1]
+    currentDeal.domain.match(/(.*)\./)[1]
   )
   // Password
   await awaitAndSendKeys(
@@ -71,15 +72,20 @@ async function createNewDomain() {
   await awaitAndClick(By.id("sslit-enabled"))
 
   // Submit domain
-  // await awaitAndClick(By.id("btn-send"))
+  await awaitAndClick(By.id("btn-send"))
 }
 
 async function installWordpress() {
   // Implying we're at the domains page
   // Enter domain of intereidst in search
+  await driver.wait(
+    until.elementLocated(By.id("domains-list-search-text-domainName")),
+    WAIT_TIME
+  )
+  await driver.findElement(By.id("domains-list-search-text-domainName")).clear()
   await awaitAndSendKeys(
     By.id("domains-list-search-text-domainName"),
-    "example.com"
+    currentDeal.domain
   )
   await driver.findElement(By.css(".search-field em")).click()
 
@@ -96,7 +102,10 @@ async function installWordpress() {
 
   // Enter Title
   await driver.findElement(By.xpath(`//input[@name="title"]`)).clear()
-  await awaitAndSendKeys(By.xpath(`//input[@name="title"]`), "Website Title")
+  await awaitAndSendKeys(
+    By.xpath(`//input[@name="title"]`),
+    currentDeal.companyName
+  )
   // Enter username
   await driver.findElement(By.xpath(`//input[@name="adminUserName"]`)).clear()
   await awaitAndSendKeys(

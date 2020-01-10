@@ -9,8 +9,10 @@ const company_names = require("./data/company_names.json").company_names
  */
 async function getData() {
   let plData = []
+
   for (let i = 0; i < company_names.length; i++) {
     const company_name = company_names[i]
+
     await axios
       .get(`${process.env.PIPELINE_DEALS_API_URL}/deals.json`, {
         params: {
@@ -19,8 +21,9 @@ async function getData() {
         },
       })
       .then(res => {
-        // console.log(res.data.entries[0].custom_fields.custom_label_1454434)
+        // console.log(res.data.entries[0])
         plData.push({
+          companyName: res.data.entries[0].company.name,
           domain: res.data.entries[0].custom_fields.custom_label_1454434,
         })
       })
