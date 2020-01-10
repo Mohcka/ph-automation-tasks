@@ -9,13 +9,14 @@ const chrome = require("selenium-webdriver/chrome")
 const geckoPath = require("geckodriver").path
 const chromePath = require("chromedriver").path
 
-const runPreBuildOut = require("./src/pre-buildout-task").runBuildout
+const { getData } = require("./src/featch-pipeline-data")
+const { runPreBuildout } = require("./src/pre-buildout-task")
 
-let driver = null;
+let driver = null
+
 
 // Initialize driver
 const runAutomation = async () => {
-
   let service = await new chrome.ServiceBuilder(chromePath).build()
   chrome.setDefaultService(service)
 
@@ -23,13 +24,18 @@ const runAutomation = async () => {
     .withCapabilities(webdriver.Capabilities.chrome())
     .build()
 
-    run();
+  await run()
 }
 
 // Start running automation tasks
-const run = () => {
+const run = async () => {
+  // Data pulled from pipeline
+  let plData = null
+
+  // 0. Get data
+  plData = await getData()
   // 1. Prebuildout
-  runPreBuildOut(driver);
+  await runPreBuildout(driver, plData.map(plDataItem => plDataItem.domain))
 }
 
 module.exports.runAutomation = runAutomation()

@@ -5,8 +5,14 @@ const { awaitAndClick, awaitAndSendKeys } = require("./selenium-helpers")
 
 let driver = null
 const WAIT_TIME = 30000 // 5 seconds
+let currentDomain = null
 
-module.exports.runBuildout = async pulledDriver => {
+/**
+ * Main function to run the prebuildout tasks
+ * @param {Builder} pulleDriver -
+ * @param {Array}   domainList  - list of domains to create throuh plesk
+ */
+const runPreBuildout = async (pulledDriver, domainsList) => {
   driver = pulledDriver
   selHelper.init(driver, WAIT_TIME)
   await driver.get("https://dh52-ylwp.accessdomain.com:8443/")
@@ -15,10 +21,11 @@ module.exports.runBuildout = async pulledDriver => {
   loginPlesk()
 
   //TODO: Begin looping through buildouts
-
-  await createNewDomain()
-  // await driver.get("https://dh52-ylwp.accessdomain.com:8443/admin/domain/")
-  await installWordpress()
+  for (let i = 0; i < domainsList.length; i++) {
+    currentDomain = domainsList[i]
+    await createNewDomain()
+    // await installWordpress()
+  }
 }
 
 // Sign into Plesk interface
@@ -44,9 +51,12 @@ async function createNewDomain() {
   await awaitAndClick(By.css("#buttonAddDomain"))
   // Enter Info
   // Domain name
-  await awaitAndSendKeys(By.id(`domainName-name`), "example.com")
+  await awaitAndSendKeys(By.id(`domainName-name`), currentDomain)
   // Username
-  await awaitAndSendKeys(By.id(`domainInfo-userName`), "example")
+  await awaitAndSendKeys(
+    By.id(`domainInfo-userName`),
+    currentDomain.match(/(.*)\./)[1]
+  )
   // Password
   await awaitAndSendKeys(
     By.id(`domainInfo-password`),
@@ -61,7 +71,7 @@ async function createNewDomain() {
   await awaitAndClick(By.id("sslit-enabled"))
 
   // Submit domain
-  await awaitAndClick(By.id("btn-send"))
+  // await awaitAndClick(By.id("btn-send"))
 }
 
 async function installWordpress() {
@@ -116,3 +126,5 @@ async function installWordpress() {
   // Installation complete, close prompt
   await awaitAndClick(By.xpath(`//span[contains(text(), "No, thanks")]/../..`))
 }
+
+module.exports = { runPreBuildout }
