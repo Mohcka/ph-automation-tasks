@@ -16,9 +16,9 @@ module.exports.runBuildout = async pulledDriver => {
 
   //TODO: Begin looping through buildouts
 
-  // createNewDomain()
-  await driver.get("https://dh52-ylwp.accessdomain.com:8443/admin/domain/")
-  installWordpress()
+  await createNewDomain()
+  // await driver.get("https://dh52-ylwp.accessdomain.com:8443/admin/domain/")
+  await installWordpress()
 }
 
 // Sign into Plesk interface
@@ -61,6 +61,7 @@ async function createNewDomain() {
   await awaitAndClick(By.id("sslit-enabled"))
 
   // Submit domain
+  await awaitAndClick(By.id("btn-send"))
 }
 
 async function installWordpress() {
@@ -111,4 +112,7 @@ async function installWordpress() {
   await awaitAndClick(
     By.css(`button[data-test-id="instance-install-form-submit-button"]`)
   )
+
+  // Installation complete, close prompt
+  await awaitAndClick(By.xpath(`//span[contains(text(), "No, thanks")]/../..`))
 }
