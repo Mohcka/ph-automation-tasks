@@ -1,22 +1,22 @@
 require("dotenv").config()
 
-const path = require("path")
+// import path = require("path")
+// import path from "path"
 
-const webdriver = require("selenium-webdriver")
-const { Builder } = webdriver
-const firefox = require("selenium-webdriver/firefox")
-const chrome = require("selenium-webdriver/chrome")
-const geckoPath = require("geckodriver").path
-const chromePath = require("chromedriver").path
+import * as webdriver from "selenium-webdriver"
+import * as chrome from "selenium-webdriver/chrome"
 
-const { getData } = require("./src/featch-pipeline-data")
-const { runPreBuildout } = require("./src/pre-buildout-task")
+import { path as chromePath } from "chromedriver"
+
+import { getData } from "./featch-pipeline-data.js"
+import { runPreBuildout } from "./pre-buildout-task.js"
+
 
 let driver = null
 
 // Initialize driver
 const runAutomation = async () => {
-  let service = await new chrome.ServiceBuilder(chromePath).build()
+  const service = await new chrome.ServiceBuilder(chromePath).build()
   chrome.setDefaultService(service)
 
   driver = await new webdriver.Builder()

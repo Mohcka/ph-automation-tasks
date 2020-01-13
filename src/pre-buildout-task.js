@@ -4,7 +4,7 @@ const selHelper = require("./selenium-helpers")
 const { awaitAndClick, awaitAndSendKeys } = require("./selenium-helpers")
 
 let driver = null
-const WAIT_TIME = null // 5 seconds
+let WAIT_TIME = null // 5 seconds
 let currentDomain = null
 
 /**
