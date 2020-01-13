@@ -4,7 +4,7 @@ const selHelper = require("./selenium-helpers")
 const { awaitAndClick, awaitAndSendKeys } = require("./selenium-helpers")
 
 let driver = null
-const WAIT_TIME = 60000 // 5 seconds
+const WAIT_TIME = null // 5 seconds
 let currentDomain = null
 
 /**
@@ -14,6 +14,7 @@ let currentDomain = null
  */
 const runPreBuildout = async (pulledDriver, domainsList) => {
   driver = pulledDriver
+  WAIT_TIME = 60000
   selHelper.init(driver, WAIT_TIME)
   await driver.get("https://dh52-ylwp.accessdomain.com:8443/")
 
