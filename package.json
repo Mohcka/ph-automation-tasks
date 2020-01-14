@@ -11,13 +11,14 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "eslint": "^5.16.0",
-    "eslint-config-prettier": "^4.1.0",
-    "eslint-plugin-prettier": "^3.0.1",
     "axios": "^0.19.1",
     "chromedriver": "^79.0.0",
     "dotenv": "^8.2.0",
+    "eslint": "^5.16.0",
+    "eslint-config-prettier": "^4.1.0",
+    "eslint-plugin-prettier": "^3.0.1",
     "geckodriver": "^1.19.1",
+    "prompts": "^2.3.0",
     "selenium-webdriver": "^4.0.0-alpha.5"
   }
 }
