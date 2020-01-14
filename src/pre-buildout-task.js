@@ -4,8 +4,8 @@ const selHelper = require("./selenium-helpers")
 const { awaitAndClick, awaitAndSendKeys } = require("./selenium-helpers")
 
 let driver = null
-const WAIT_TIME = null // 5 seconds
-let currentDomain = null
+let WAIT_TIME = null 
+let currentDeal = null
 
 /**
  * Main function to run the prebuildout tasks
@@ -21,7 +21,7 @@ const runPreBuildout = async (pulledDriver, domainsList) => {
   // Login
   loginPlesk()
 
-  //TODO: Begin looping through buildouts
+  // looping through buildouts
   for (let i = 0; i < domainsList.length; i++) {
     currentDeal = domainsList[i]
 
@@ -135,6 +135,26 @@ async function installWordpress() {
 
   // Installation complete, close prompt
   await awaitAndClick(By.xpath(`//span[contains(text(), "No, thanks")]/../..`))
+}
+
+/**
+ * Enter text into the domain search field to pull up its page
+ * @param {String} domain - The domain to be searched
+ */
+async function pullUpDomainPageFor(domain){
+  await driver.wait(
+    until.elementLocated(By.id("domains-list-search-text-domainName")),
+    WAIT_TIME
+  )
+  await driver.findElement(By.id("domains-list-search-text-domainName")).clear()
+  await awaitAndSendKeys(
+    By.id("domains-list-search-text-domainName"),
+    domain
+  )
+  await driver.findElement(By.css(".search-field em")).click()
+
+  await driver.sleep(2000)
+  await awaitAndClick(By.css("#domains-list-container .odd td a"))
 }
 
 module.exports = { runPreBuildout }
