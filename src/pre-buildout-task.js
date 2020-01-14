@@ -2,10 +2,14 @@ const { By, Key, until } = require("selenium-webdriver")
 
 const selHelper = require("./selenium-helpers")
 const { awaitAndClick, awaitAndSendKeys } = require("./selenium-helpers")
+const taskHelper = require("./task-helpers")
+const { pullUpDomainPageFor } = require("./task-helpers")
 
 let driver = null
-let WAIT_TIME = null 
+let WAIT_TIME = null
 let currentDeal = null
+
+let failedDeals = []
 
 /**
  * Main function to run the prebuildout tasks
@@ -16,6 +20,7 @@ const runPreBuildout = async (pulledDriver, domainsList) => {
   driver = pulledDriver
   WAIT_TIME = 60000
   selHelper.init(driver, WAIT_TIME)
+  taskHelper.init(driver, WAIT_TIME)
   await driver.get("https://dh52-ylwp.accessdomain.com:8443/")
 
   // Login
@@ -24,9 +29,27 @@ const runPreBuildout = async (pulledDriver, domainsList) => {
   // looping through buildouts
   for (let i = 0; i < domainsList.length; i++) {
     currentDeal = domainsList[i]
+    // currentDeal.domain = "example.com"
 
-    await createNewDomain()
-    await installWordpress()
+    try {
+      await createNewDomain()
+      await installWordpress()
+      await addTheme()
+
+    } catch (err) {
+      failedDeals.push(currentDeal)
+      console.error(`Err on: ${currentDeal.companyName}`)
+      console.error(err)
+      // Go back to main page
+      await driver.get("https://dh52-ylwp.accessdomain.com:8443/")
+    }
+  }
+
+  if (failedDeals.length > 0) {
+    console.log(`The following deals have failed:`.yellow)
+    console.log(
+      failedDeals.map(failedDeal => failedDeal.companyName).join(`\n`).red
+    )
   }
 }
 
@@ -51,7 +74,7 @@ async function createNewDomain() {
   await awaitAndClick(By.css(".nav-domains a"))
   // Create new domain
   await awaitAndClick(By.css("#buttonAddDomain"))
-  // Enter Info
+  // ##Enter Info
   // Domain name
   await awaitAndSendKeys(By.id(`domainName-name`), currentDeal.domain)
   // Username
@@ -78,7 +101,7 @@ async function createNewDomain() {
 
 async function installWordpress() {
   // Implying we're at the domains page
-  // Enter domain of intereidst in search
+  // Enter domain of interest in search
   await driver.wait(
     until.elementLocated(By.id("domains-list-search-text-domainName")),
     WAIT_TIME
@@ -137,24 +160,29 @@ async function installWordpress() {
   await awaitAndClick(By.xpath(`//span[contains(text(), "No, thanks")]/../..`))
 }
 
-/**
- * Enter text into the domain search field to pull up its page
- * @param {String} domain - The domain to be searched
- */
-async function pullUpDomainPageFor(domain){
-  await driver.wait(
-    until.elementLocated(By.id("domains-list-search-text-domainName")),
-    WAIT_TIME
-  )
-  await driver.findElement(By.id("domains-list-search-text-domainName")).clear()
-  await awaitAndSendKeys(
-    By.id("domains-list-search-text-domainName"),
-    domain
-  )
-  await driver.findElement(By.css(".search-field em")).click()
+async function addTheme() {
+  // Goto domains and pull up the deal's domain page
+  await pullUpDomainPageFor(currentDeal.domain)
+  // Go to themes section
+  await awaitAndClick(By.xpath(`//a[contains(text(), "Themes")]`))
 
-  await driver.sleep(2000)
-  await awaitAndClick(By.css("#domains-list-container .odd td a"))
+  // Install astra
+  await awaitAndClick(
+    By.xpath(
+      `//span[contains(text(), "Astra")]/../../../..//button[@data-test-id="plugendio-install-button"]`
+    )
+  )
+  // Wait for it to install
+  await driver.wait(
+    until.elementLocated(
+      By.xpath(
+        `//span[contains(text(), "Astra")]/../../../..//span[@class="pul-text pul-text--success"]`
+      )
+    )
+  )
+
+  // Close theme slideout
+  await awaitAndClick(By.css(".pul-drawer-header button"))
 }
 
 module.exports = { runPreBuildout }

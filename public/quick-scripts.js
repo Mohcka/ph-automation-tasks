@@ -7,3 +7,6 @@
 //* Utilities
 // Standard xpath script
 document.evaluate(`//*`, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue
+// Xpath script when searching for specific script
+document.evaluate(`//*[contains(text(), "Text")]`, 
+document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue

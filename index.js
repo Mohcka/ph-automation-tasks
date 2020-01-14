@@ -7,6 +7,7 @@ const chrome = require("selenium-webdriver/chrome")
 const chromePath = require("chromedriver").path
 
 const prompts = require("prompts")
+const colors = require("colors")
 
 const { getData } = require("./src/featch-pipeline-data")
 const { runPreBuildout } = require("./src/pre-buildout-task")
@@ -49,21 +50,24 @@ const run = async () => {
   switch (choice) {
     case 1:
       await runPreBuildout(driver, plData)
+      break;
     case 2:
       await runWpPreconfig(driver, plData)
+      break;
     default:
       console.log(
-        "You've made an invalid input.  Please restart the program and try again."
+        "You've made an invalid input.  Please restart the program and try again.".black.bgRed
       )
   }
 }
 
 async function promptUser() {
-  const choicesPromptText = `Which step would you like to perform.  The actions will perform for all deals you have
-  entered in the company_names.json file. (Select a Number):
-  1. Prebuildout
-  2. Configure Wordpress for deal
-  `
+  const choicesPromptText = `
+Which step would you like to perform.  The actions will perform for all deals you have
+entered in the company_names.json file. 
+1. Prebuildout
+2. Configure Wordpress for deal
+(Select a Number):`.cyan
   const choicePrompt = await prompts({
     type: "number",
     name: "choice",

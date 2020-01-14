@@ -14,17 +14,14 @@ async function getData() {
     const company_name = company_names[i]
 
     await axios
-      .get(`${process.env.PIPELINE_DEALS_API_URL}/deals.json`, {
-        params: {
-          api_key: process.env.PIPELINE_DEALS_API_KEY,
-          "conditions[person_company_name]": company_name,
-        },
-      })
+      .get(
+        `${process.env.PIPELINE_DEALS_API_URL}/deals.json?api_key=${process.env.PIPELINE_DEALS_API_KEY}&conditions[person_company_name]=${company_name}`
+      )
       .then(res => {
-        // console.log(res.data.entries[0])
+        // console.log(res)
         plData.push({
           companyName: res.data.entries[0].company.name,
-          domain: res.data.entries[0].custom_fields.custom_label_1454434,
+          domain: res.data.entries[0].custom_fields.custom_label_1454434.toLowerCase(),
         })
       })
   }

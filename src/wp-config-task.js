@@ -1,16 +1,22 @@
+const path = require("path")
+
 const { By, Key, until } = require("selenium-webdriver")
 
 const selHelper = require("./selenium-helpers")
 const taskHelper = require("./task-helpers")
 const { awaitAndClick, awaitAndSendKeys } = require("./selenium-helpers")
 
+const colors = require("colors")
+
 let driver = null
 let WAIT_TIME = null
 let currentDeal = null
 
-let tabs = null
+// let tabs = null
 
 let pageName = "Test"
+
+let failLogs = []
 
 /**
  * Main function to run the prebuildout tasks
@@ -29,15 +35,33 @@ const runWpPreconfig = async (pulledDriver, domainsList) => {
 
   // looping through buildouts
   for (let i = 0; i < domainsList.length; i++) {
-    currentDeal = domainsList[i]
+    try {
+      currentDeal = domainsList[i]
 
-    // Login deal wordpress
-    await loginWP()
+      // Login deal wordpress
+      await loginWP()
 
-    await driver.sleep(5000)
+      // Upload elementor
+      await uploadPlugins()
+      // Creating homepage
+      await createHomePage()
 
-    // Set as homepage
-    await indexHomePage()
+      // Set as homepage
+      await indexHomePage()
+      // Close tab and go back to plesk
+      await restart()
+    } catch (err) {
+      failLogs.push(currentDeal)
+      // close tab and go back to main tab if wordpres was opened prior
+      await restart()
+    }
+  }
+
+  if (failLogs.length > 0) {
+    console.log(`The following deals have faileld:`.yellow)
+    console.log(
+      failLogs.map(failedDeal => failedDeal.companyName).join(`\n`).red
+    )
   }
 }
 
@@ -54,8 +78,11 @@ async function loginWP() {
   )
 
   // Switch tab to wordpress
-  tabs = await driver.getAllWindowHandles()
+  const tabs = await driver.getAllWindowHandles()
   await driver.switchTo().window(tabs[1])
+}
+
+async function createHomePage() {
   // Enter Pages page
   await awaitAndClick(By.id(`menu-pages`))
   // Add new page
@@ -84,6 +111,12 @@ async function loginWP() {
   await awaitAndClick(By.css(".editor-post-publish-panel__toggle"))
   // Do it again!
   await awaitAndClick(By.css(".editor-post-publish-button"))
+
+  // Wait for page to be published
+  await driver.wait(
+    until.elementLocated(By.xpath(`//*[contains(text(), "Published")]`)),
+    WAIT_TIME
+  )
 }
 
 async function indexHomePage() {
@@ -96,6 +129,30 @@ async function indexHomePage() {
   await awaitAndClick(By.xpath(`//option[contains(text(), "${pageName}")]`))
   // Save changes
   await awaitAndClick(By.id("submit"))
+}
+
+async function uploadPlugins() {
+  // goto plugins
+  await awaitAndClick(By.id("menu-plugins"))
+  // click add new
+  await awaitAndClick(By.css(".page-title-action"))
+  // click upload plugin
+  await awaitAndClick(By.css(".upload-view-toggle"))
+  // upload file
+  await awaitAndSendKeys(
+    By.id("pluginzip"),
+    path.resolve("./public/plugins/elementor-pro-2.7.2.zip")
+  )
+}
+/**
+ * Closes the wordpress tab and restarts the process
+ */
+async function restart() {
+  const tabs = await driver.getAllWindowHandles()
+  if(tabs.length > 1) {
+    await driver.close()
+    await driver.switchTo().window(tabs[0])
+  }
 }
 
 module.exports = { runWpPreconfig }

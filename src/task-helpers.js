@@ -2,7 +2,6 @@ const { until, By } = require("selenium-webdriver")
 const selHelper = require("./selenium-helpers")
 const { awaitAndClick, awaitAndSendKeys } = require("./selenium-helpers")
 
-
 let driver = null,
   waitTime = null
 /**
@@ -10,25 +9,20 @@ let driver = null,
  * @param {String} thisDriver - The selenimium webdriver for handling automated webtasks
  * @param {Number} thisWaitTime - Amount of time to wait for each action
  */
-module.exports.init = (thisDriver, thisWaitTime) => {
+function init(thisDriver, thisWaitTime) { 
   driver = thisDriver
   waitTime = thisWaitTime
 
   selHelper.init(driver, waitTime)
 }
 
-// function init(thisDriver, thisWaitTime) {
-//   driver = thisDriver
-//   waitTime = thisWaitTime
-// }
-
 /**
  * Enter text into the domain search field to pull up its page
  * @param {String} domain - The domain to be searched
  */
-// async function pullUpDomainPageFor(domain){
-module.exports.pullUpDomainPageFor = async domain => {
+async function pullUpDomainPageFor(domain){
   // Enter Domain page
+  await awaitAndClick(By.css(".nav-domains"))
   await driver.wait(
     until.elementLocated(By.id("domains-list-search-text-domainName")),
     waitTime
@@ -41,4 +35,4 @@ module.exports.pullUpDomainPageFor = async domain => {
   await awaitAndClick(By.css("#domains-list-container .odd td a"))
 }
 
-// module.exports = { init, pullUpDomainPageFor }
+module.exports = { init, pullUpDomainPageFor }
