@@ -1,4 +1,4 @@
-const { until } = require("selenium-webdriver")
+const { until, By } = require("selenium-webdriver")
 
 let driver = null,
   waitTime = null
@@ -12,12 +12,18 @@ module.exports.init = (thisDriver, thisWaitTime) => {
   waitTime = thisWaitTime
 }
 
+function init(thisDriver, thisWaitTime) {
+  driver = thisDriver
+  waitTime = thisWaitTime
+}
+
 /**
  * Await for element to be visible before actually clicking on it
  * @param {By} locator - Selenium locator to find the element to click
+ * @param {Number} waitFor - Number of milliseconds to wait to click element, default is waitTime set in init()
  */
-module.exports.awaitAndClick = async locator => {
-  await driver.wait(until.elementLocated(locator), waitTime)
+async function awaitAndClick(locator, waitFor = waitTime) {
+  await driver.wait(until.elementLocated(locator), waitFor)
   await driver.findElement(locator).click()
 }
 
@@ -26,8 +32,33 @@ module.exports.awaitAndClick = async locator => {
  *
  * @param {By} locator - Selenium locator to find the element to click
  * @param {String} keys - Keys to enter into the found field
+ * @param {Number} waitFor - Number of milliseconds to wait to click element, default is waitTime set in init()
  */
-module.exports.awaitAndSendKeys = async (locator, keys) => {
-  await driver.wait(until.elementLocated(locator), waitTime)
+async function awaitAndSendKeys(locator, keys, waitFor = waitTime) {
+  await driver.wait(until.elementLocated(locator), waitFor)
   await driver.findElement(locator).sendKeys(...keys)
 }
+
+// Sign into Plesk interface
+async function loginPlesk() {
+  await awaitAndSendKeys(
+    By.css("#loginSection-username"),
+    process.env.PLESK_USERNAME
+  )
+
+  // Enter passwaored
+  await driver
+    .findElement(By.css("#loginSection-password"))
+    .sendKeys(process.env.PLESK_PASSWORD)
+
+  // Submit
+  await driver.findElement(By.css("#btn-send")).click()
+}
+
+/**
+ * Switch to a specifc tab based on the tab's title
+ * @param {String} title The key title to search for the specific tab
+ */
+async function switchToTab(title) {}
+
+module.exports = { init, awaitAndClick, awaitAndSendKeys, loginPlesk }
