@@ -41,6 +41,9 @@ async function awaitAndSendKeys(locator, keys, waitFor = waitTime) {
 
 // Sign into Plesk interface
 async function loginPlesk() {
+  // Enter plesk server
+  await driver.get("https://dh52-ylwp.accessdomain.com:8443/")
+
   await awaitAndSendKeys(
     By.css("#loginSection-username"),
     process.env.PLESK_USERNAME
