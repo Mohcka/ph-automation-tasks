@@ -1,5 +1,7 @@
 const { By, Key, until } = require("selenium-webdriver")
 
+const colors = require("colors")
+
 const selHelper = require("./selenium-helpers")
 const { awaitAndClick, awaitAndSendKeys } = require("./selenium-helpers")
 const taskHelper = require("./task-helpers")
@@ -16,7 +18,7 @@ let failedDeals = []
  * @param {Builder} pulleDriver -
  * @param {Array}   domainList  - list of domains to create throuh plesk
  */
-const runPreBuildout = async (pulledDriver, domainsList) => {
+const runPreBuildout = async (pulledDriver, dealList) => {
   driver = pulledDriver
   WAIT_TIME = 60000
   selHelper.init(driver, WAIT_TIME)
@@ -27,15 +29,14 @@ const runPreBuildout = async (pulledDriver, domainsList) => {
   loginPlesk()
 
   // looping through buildouts
-  for (let i = 0; i < domainsList.length; i++) {
-    currentDeal = domainsList[i]
+  for (let i = 0; i < dealList.length; i++) {
+    currentDeal = dealList[i]
     // currentDeal.domain = "example.com"
 
     try {
       await createNewDomain()
       await installWordpress()
-      await addTheme()
-
+      // await addTheme()
     } catch (err) {
       failedDeals.push(currentDeal)
       console.error(`Err on: ${currentDeal.companyName}`)
@@ -50,6 +51,17 @@ const runPreBuildout = async (pulledDriver, domainsList) => {
     console.log(
       failedDeals.map(failedDeal => failedDeal.companyName).join(`\n`).red
     )
+  } else {
+    console.log(
+      `   _____                      _      _       
+  / ____|                    | |    | |      
+ | |     ___  _ __ ___  _ __ | | ___| |_ ___ 
+ | |    / _ \\| '_ \` _ \\| '_ \\| |/ _ \\ __/ _ \\
+ | |___| (_) | | | | | | |_) | |  __/ ||  __/
+  \\_____\\___/|_| |_| |_| .__/|_|\\___|\\__\\___|
+                       | |                   
+                       |_|                   `.rainbow)
+    console.log("All deals prebuilt successfully ✓".green)
   }
 }
 
@@ -131,11 +143,14 @@ async function installWordpress() {
     currentDeal.companyName
   )
   // Enter username
-  await driver.findElement(By.xpath(`//input[@name="adminUserName"]`)).clear()
-  await awaitAndSendKeys(
-    By.xpath(`//input[@name="adminUserName"]`),
-    "websitesupport"
+  let usernameElement = await driver.findElement(
+    By.xpath(`//input[@name="adminUserPassword"]`)
   )
+  await driver
+    .actions()
+    .doubleClick(usernameElement)
+    .sendKeys("websitesupport")
+    .perform()
 
   // password
 
@@ -183,6 +198,8 @@ async function addTheme() {
 
   // Close theme slideout
   await awaitAndClick(By.css(".pul-drawer-header button"))
+  //TODO: wait it out for now
+  await driver.sleep(2000)
 }
 
 module.exports = { runPreBuildout }
