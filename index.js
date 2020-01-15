@@ -18,6 +18,17 @@ let choice = 0
 
 // Initialize driver
 const runAutomation = async () => {
+  console.log(
+    `  _    _      _ _        __          __        _     _ 
+ | |  | |    | | |       \\ \\        / /       | |   | |
+ | |__| | ___| | | ___    \\ \\  /\\  / /__  _ __| | __| |
+ |  __  |/ _ \\ | |/ _ \\    \\ \\/  \\/ / _ \\| '__| |/ _\` |
+ | |  | |  __/ | | (_) |    \\  /\\  / (_) | |  | | (_| |
+ |_|  |_|\\___|_|_|\\___/      \\/  \\/ \\___/|_|  |_|\\__,_|
+                                                       
+                                                       `.rainbow
+  )
+
   await promptUser()
   await createWebDriver()
   await run()
