@@ -13,6 +13,7 @@ const { getData } = require("./src/featch-pipeline-data")
 const { runPreBuildout } = require("./src/pre-buildout-task")
 const { runWpPreconfig } = require("./src/wp-config-task")
 
+
 let driver = null
 let choice = 0
 
@@ -24,9 +25,7 @@ const runAutomation = async () => {
  | |__| | ___| | | ___    \\ \\  /\\  / /__  _ __| | __| |
  |  __  |/ _ \\ | |/ _ \\    \\ \\/  \\/ / _ \\| '__| |/ _\` |
  | |  | |  __/ | | (_) |    \\  /\\  / (_) | |  | | (_| |
- |_|  |_|\\___|_|_|\\___/      \\/  \\/ \\___/|_|  |_|\\__,_|
-                                                       
-                                                       `.rainbow
+ |_|  |_|\\___|_|_|\\___/      \\/  \\/ \\___/|_|  |_|\\__,_|`.rainbow
   )
 
   await promptUser()
@@ -55,21 +54,33 @@ const run = async () => {
 
   // 0. Get data
   plData = await getData()
-  console.log(plData)
+  // console.log(
+  //   plData.map(plItem => ({
+  //     domain: plItem.domain,
+  //     companyName: plItem.companyName,
+  //   }))
+  // )
 
   // Perform acton based on choice
   switch (choice) {
     case 1:
       await runPreBuildout(driver, plData)
-      break;
+      break
     case 2:
       await runWpPreconfig(driver, plData)
-      break;
+      break
+    case 3:
+      // await runTemplateGen(plData)
+      break
+    //TODO: test template generator
     default:
       console.log(
-        "You've made an invalid input.  Please restart the program and try again.".black.bgRed
+        "You've made an invalid input.  Please restart the program and try again."
+          .black.bgRed
       )
   }
+
+  console.log("Done".green)
 }
 
 async function promptUser() {

@@ -5,6 +5,8 @@ const { By, Key, until } = require("selenium-webdriver")
 const selHelper = require("./selenium-helpers")
 const taskHelper = require("./task-helpers")
 const { awaitAndClick, awaitAndSendKeys } = require("./selenium-helpers")
+const { runTemplateGen } = require("./template-generator")
+const { slugify } = require("./utils/text-utils")
 
 const colors = require("colors")
 
@@ -23,7 +25,7 @@ let failLogs = []
  * @param {Builder} pulleDriver -
  * @param {Array}   domainList  - list of domains to create throuh plesk
  */
-const runWpPreconfig = async (pulledDriver, domainsList) => {
+const runWpPreconfig = async (pulledDriver, dealsData) => {
   driver = pulledDriver
   WAIT_TIME = 60000
   selHelper.init(driver, WAIT_TIME)
@@ -31,6 +33,9 @@ const runWpPreconfig = async (pulledDriver, domainsList) => {
 
   // Boolean to determine if the current task has failed
   // let taskFailed = false
+
+  // Create templates
+  await runTemplateGen(dealsData)
 
   try {
     await loginElementor()
@@ -42,22 +47,26 @@ const runWpPreconfig = async (pulledDriver, domainsList) => {
   await selHelper.loginPlesk()
 
   // looping through buildouts
-  for (let i = 0; i < domainsList.length; i++) {
+  for (let i = 0; i < dealsData.length; i++) {
     try {
-      currentDeal = domainsList[i]
+      currentDeal = dealsData[i]
+      currentDeal.domain = "getpagehubgrid.com"
 
       // Login deal wordpress
       await loginWP()
 
       // Activate Elementor Pro
       try {
-        await connectAndActivateElementor()
+        // await connectAndActivateElementor()
       } catch (err) {
         console.log(
           `Elementor seems to be already activated for ${currentDeal.domain}`
             .yellow
         )
       }
+
+      // import theme
+      await importTemplate()
 
       try {
         // await activateAstra()
@@ -77,6 +86,7 @@ const runWpPreconfig = async (pulledDriver, domainsList) => {
       await restart()
     } catch (err) {
       failLogs.push(currentDeal)
+      console.log(err)
       // close tab and go back to main tab if wordpres was opened prior
       await restart()
     }
@@ -149,6 +159,7 @@ async function createHomePage() {
   // publish
   await awaitAndClick(By.css(".editor-post-publish-panel__toggle"))
   // Do it again!
+  await driver.sleep(1000)
   await awaitAndClick(By.css(".editor-post-publish-button"))
 
   // Wait for page to be published
@@ -156,6 +167,55 @@ async function createHomePage() {
     until.elementLocated(By.xpath(`//*[contains(text(), "Published")]`)),
     WAIT_TIME
   )
+
+  // Apply Elementor Page
+  await applyElementorPage()
+}
+
+async function applyElementorPage() {
+  // Immplying we're already on the wp edit page for the current page, start elementor buildout
+  // Apply elementor
+  await awaitAndClick(By.id("elementor-switch-mode-button"))
+  // insert template
+  let actions = driver.actions()
+  let elAddTemplate = By.css(".elementor-add-template-button")
+  let elementorIframeLocator = By.id("elementor-preview-iframe")
+  // await driver.wait(until.elementLocated(elAddTemplate), WAIT_TIME)
+  let passed = false
+
+  // console.log(await driver.getAllWindowHandles())
+
+  await driver.wait(
+    until.ableToSwitchToFrame(elementorIframeLocator),
+    WAIT_TIME
+  )
+  await driver.switchTo().defaultContent()
+
+  // find element
+  let elementorIframeEl = await driver.findElement(elementorIframeLocator)
+  await driver.switchTo().frame(elementorIframeEl)
+
+  await driver.findElement(elAddTemplate).click()
+
+  await driver.switchTo().defaultContent()
+
+  await awaitAndClick(By.xpath(`//div[contains(text(), "My Templates")]`))
+  await awaitAndClick(
+    By.xpath(
+      `//div[contains(text(), "${currentDeal.companyName} Template")]/..//button`
+    )
+  )
+  await driver.sleep(2000) // give it a sec
+  // Update the page
+  await awaitAndClick(By.id("elementor-panel-saver-button-publish"))
+  await driver.wait(
+    until.elementLocated(
+      By.css("#elementor-panel-saver-button-publish.elementor-disabled")
+    )
+  )
+  // head back out to wp
+  await awaitAndClick(By.css(".elementor-header-button"))
+  await awaitAndClick(By.css(".elementor-panel-menu-item-exit-to-dashboard"))
 }
 
 async function indexHomePage() {
@@ -268,6 +328,23 @@ async function connectAndActivateElementor() {
   // Click activate
   await driver.wait(until.elementLocated(By.css(".elementor-button")), 10000)
   await driver.findElement(By.css(".elementor-button")).click()
+}
+
+async function importTemplate() {
+  // Go to elmentor templates
+  await awaitAndClick(By.id("menu-posts-elementor_library"))
+  // click import template trigger
+  // await driver.sleep(2000) // give it a sec
+  await awaitAndClick(By.id("elementor-import-template-trigger"))
+  // Enter tempalte
+  await awaitAndSendKeys(
+    By.css("#elementor-import-template-form-inputs input"),
+    path.resolve("templates", slugify(currentDeal.companyName), "template.json")
+  )
+  // Submit
+  await awaitAndClick(
+    By.css(`#elementor-import-template-form-inputs input[type="submit"]`)
+  )
 }
 
 /**
