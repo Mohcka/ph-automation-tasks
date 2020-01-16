@@ -1,6 +1,11 @@
 node_modules
 package-lock.json
 .env
-src/data/*
 debug.log
 built
+logs
+templates
+
+
+credentials.json
+token.json
