@@ -149,9 +149,13 @@ async function fetchGImages(q) {
     searchType: "image",
     imgSize: "xlarge",
   })
-  // console.log(res.data.items[1].link.replace(/\//g, "\\/"))
 
-  return res.data.items.map(item =>
+  let validItems = res.data.items.filter(item =>
+    item.link.match(/\.(jpe?g|png)/)
+  )
+  // console.log(validItems)
+
+  return validItems.map(item =>
     item.link.replace(/\//g, "\\/").replace(/\?.*/g, "")
   )
 }
