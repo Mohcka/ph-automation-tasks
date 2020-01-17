@@ -12,6 +12,7 @@ const company_names = require("./data/company_names.json").company_names
 //* keywords custom_label_1454401
 //* gmb address custom_label_1454398
 //* facebook desc custom_label_1486885
+//* website completed date custom_label_2625754
 
 /**
  * Get data from the Pipeline Deals API based on company names
