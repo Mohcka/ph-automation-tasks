@@ -9,7 +9,7 @@ const chromePath = require("chromedriver").path
 const prompts = require("prompts")
 const colors = require("colors")
 
-const { getData } = require("./src/featch-pipeline-data")
+const { getData } = require("./src/fetch-pipeline-data")
 const { runPreBuildout } = require("./src/pre-buildout-task")
 const { runWpPreconfig } = require("./src/wp-config-task")
 
@@ -54,12 +54,6 @@ const run = async () => {
 
   // 0. Get data
   plData = await getData()
-  // console.log(
-  //   plData.map(plItem => ({
-  //     domain: plItem.domain,
-  //     companyName: plItem.companyName,
-  //   }))
-  // )
 
   // Perform acton based on choice
   switch (choice) {
@@ -85,10 +79,9 @@ const run = async () => {
 
 async function promptUser() {
   const choicesPromptText = `
-Which step would you like to perform.  The actions will perform for all deals you have
-entered in the company_names.json file. 
-1. Prebuildout
-2. Configure Wordpress for deal
+Please select 
+1. Website Purchase
+2. Buildout
 (Select a Number):`.cyan
   const choicePrompt = await prompts({
     type: "number",

@@ -50,14 +50,14 @@ const runWpPreconfig = async (pulledDriver, dealsData) => {
   for (let i = 0; i < dealsData.length; i++) {
     try {
       currentDeal = dealsData[i]
-      currentDeal.domain = "getpagehubgrid.com"
+      // currentDeal.domain = "getpagehubgrid.com" // For testing purposes
 
       // Login deal wordpress
       await loginWP()
 
       // Activate Elementor Pro
       try {
-        // await connectAndActivateElementor()
+        await connectAndActivateElementor()
       } catch (err) {
         console.log(
           `Elementor seems to be already activated for ${currentDeal.domain}`
@@ -177,7 +177,6 @@ async function applyElementorPage() {
   // Apply elementor
   await awaitAndClick(By.id("elementor-switch-mode-button"))
   // insert template
-  let actions = driver.actions()
   let elAddTemplate = By.css(".elementor-add-template-button")
   let elementorIframeLocator = By.id("elementor-preview-iframe")
   // await driver.wait(until.elementLocated(elAddTemplate), WAIT_TIME)
@@ -304,7 +303,7 @@ async function loginElementor() {
 }
 
 async function connectAndActivateElementor() {
-  await awaitAndClick(By.css(".elementor-button"))
+  await awaitAndClick(By.css(".elementor-button"), 10000)
 
   try {
     await driver.wait(
