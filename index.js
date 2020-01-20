@@ -13,7 +13,6 @@ const { getData } = require("./src/fetch-pipeline-data")
 const { runPreBuildout } = require("./src/automation-tasks/pre-buildout-task")
 const { runWpPreconfig } = require("./src/automation-tasks/wp-config-task")
 
-
 let driver = null
 let choice = 0
 
@@ -63,10 +62,6 @@ const run = async () => {
     case 2:
       await runWpPreconfig(driver, plData)
       break
-    case 3:
-      // await runTemplateGen(plData)
-      break
-    //TODO: test template generator
     default:
       console.log(
         "You've made an invalid input.  Please restart the program and try again."
@@ -101,7 +96,7 @@ Please select a buildout process...
   const choicePrompt = await prompts({
     type: "number",
     name: "buldoutAction",
-    message: buildoutPromptText
+    message: buildoutPromptText,
   })
 
   choice = choicePrompt.buldoutAction
