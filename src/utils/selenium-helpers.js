@@ -62,6 +62,8 @@ async function loginPlesk() {
  * Switch to a specifc tab based on the tab's title
  * @param {String} title The key title to search for the specific tab
  */
-async function switchToTab(title) {}
+async function switchToTab(title) {
+  
+}
 
 module.exports = { init, awaitAndClick, awaitAndSendKeys, loginPlesk }

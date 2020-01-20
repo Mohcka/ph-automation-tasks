@@ -10,8 +10,8 @@ const prompts = require("prompts")
 const colors = require("colors")
 
 const { getData } = require("./src/fetch-pipeline-data")
-const { runPreBuildout } = require("./src/pre-buildout-task")
-const { runWpPreconfig } = require("./src/wp-config-task")
+const { runPreBuildout } = require("./src/automation-tasks/pre-buildout-task")
+const { runWpPreconfig } = require("./src/automation-tasks/wp-config-task")
 
 
 let driver = null
@@ -28,7 +28,7 @@ const runAutomation = async () => {
  |_|  |_|\\___|_|_|\\___/      \\/  \\/ \\___/|_|  |_|\\__,_|`.rainbow
   )
 
-  await promptUser()
+  await intialPrompt()
   await createWebDriver()
   await run()
 }
@@ -77,9 +77,10 @@ const run = async () => {
   console.log("Done".green)
 }
 
-async function promptUser() {
+async function intialPrompt() {
   const choicesPromptText = `
-Please select 
+Please select a buildout process.  All buildouts to run are received from the company_names.json file.  
+If you already haven't done so, please enter the data into that file with the desired deals to proces buildouts for.
 1. Website Purchase
 2. Buildout
 (Select a Number):`.cyan
@@ -90,6 +91,20 @@ Please select
   })
 
   choice = choicePrompt.choice
+}
+
+async function buildPrompts() {
+  const buildoutPromptText = `
+Please select a buildout process...
+`
+
+  const choicePrompt = await prompts({
+    type: "number",
+    name: "buldoutAction",
+    message: buildoutPromptText
+  })
+
+  choice = choicePrompt.buldoutAction
 }
 
 module.exports.runAutomation = runAutomation()

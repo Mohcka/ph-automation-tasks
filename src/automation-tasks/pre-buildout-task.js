@@ -2,10 +2,10 @@ const { By, Key, until } = require("selenium-webdriver")
 
 const colors = require("colors")
 
-const selHelper = require("./selenium-helpers")
-const { awaitAndClick, awaitAndSendKeys } = require("./selenium-helpers")
-const taskHelper = require("./task-helpers")
-const { pullUpDomainPageFor } = require("./task-helpers")
+const selHelper = require("../utils/selenium-helpers")
+const { awaitAndClick, awaitAndSendKeys } = require("../utils/selenium-helpers")
+const taskHelper = require("../utils/task-helpers")
+const { pullUpDomainPageFor } = require("../utils/task-helpers")
 
 let driver = null
 let WAIT_TIME = null

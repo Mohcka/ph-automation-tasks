@@ -2,11 +2,11 @@ const path = require("path")
 
 const { By, Key, until } = require("selenium-webdriver")
 
-const selHelper = require("./selenium-helpers")
-const taskHelper = require("./task-helpers")
-const { awaitAndClick, awaitAndSendKeys } = require("./selenium-helpers")
-const { runTemplateGen } = require("./template-generator")
-const { slugify } = require("./utils/text-utils")
+const selHelper = require("../utils/selenium-helpers")
+const { awaitAndClick, awaitAndSendKeys } = require("../utils/selenium-helpers")
+const taskHelper = require("../utils/task-helpers")
+const { runTemplateGen } = require("../template-generator")
+const { slugify } = require("../utils/text-utils")
 
 const colors = require("colors")
 
