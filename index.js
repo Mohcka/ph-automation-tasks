@@ -12,24 +12,26 @@ const colors = require("colors")
 const { getData } = require("./src/fetch-pipeline-data")
 const { runPreBuildout } = require("./src/automation-tasks/pre-buildout-task")
 const { runWpPreconfig } = require("./src/automation-tasks/wp-config-task")
+const DNSTask = require("./src/automation-tasks/dns-task")
+
+const asciiArt = require("./src/utils/ascii-art")
 
 let driver = null
 let choice = 0
 
 // Initialize driver
 const runAutomation = async () => {
-  console.log(
-    `  _    _      _ _        __          __        _     _ 
- | |  | |    | | |       \\ \\        / /       | |   | |
- | |__| | ___| | | ___    \\ \\  /\\  / /__  _ __| | __| |
- |  __  |/ _ \\ | |/ _ \\    \\ \\/  \\/ / _ \\| '__| |/ _\` |
- | |  | |  __/ | | (_) |    \\  /\\  / (_) | |  | | (_| |
- |_|  |_|\\___|_|_|\\___/      \\/  \\/ \\___/|_|  |_|\\__,_|`.rainbow
-  )
+  console.log(asciiArt.helloWorld.rainbow)
 
-  await intialPrompt()
-  await createWebDriver()
-  await run()
+  try {
+    await intialPrompt()
+    await createWebDriver()
+    await run()
+
+  } finally {
+    await driver.quit()
+  }
+  
 }
 
 async function createWebDriver() {
@@ -56,11 +58,14 @@ const run = async () => {
 
   // Perform acton based on choice
   switch (choice) {
-    case 1:
+    case 3:
       await runPreBuildout(driver, plData)
       break
     case 2:
       await runWpPreconfig(driver, plData)
+      break
+    case 1:
+      await new DNSTask(driver, plData).runTask()
       break
     default:
       console.log(
@@ -76,8 +81,9 @@ async function intialPrompt() {
   const choicesPromptText = `
 Please select a buildout process.  All buildouts to run are received from the company_names.json file.  
 If you already haven't done so, please enter the data into that file with the desired deals to proces buildouts for.
-1. Website Purchase
-2. Buildout
+1. Point NameCheap nameservers
+2. Website Purchase
+3. Buildout
 (Select a Number):`.cyan
   const choicePrompt = await prompts({
     type: "number",

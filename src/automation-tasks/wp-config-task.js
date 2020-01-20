@@ -2,13 +2,13 @@ const path = require("path")
 
 const { By, Key, until } = require("selenium-webdriver")
 
-const selHelper = require("../utils/selenium-helpers")
-const { awaitAndClick, awaitAndSendKeys } = require("../utils/selenium-helpers")
+const SelHelper = require("../utils/selenium-helpers")
 const taskHelper = require("../utils/task-helpers")
 const { runTemplateGen } = require("../template-generator")
 const { slugify } = require("../utils/text-utils")
 
 const colors = require("colors")
+const asciiArt = require("../utils/ascii-art")
 
 let driver = null
 let WAIT_TIME = null
@@ -19,6 +19,7 @@ let currentDeal = null
 let pageName = "Home"
 
 let failLogs = []
+let sh, th
 
 /**
  * Main function to run the prebuildout tasks
@@ -28,8 +29,9 @@ let failLogs = []
 const runWpPreconfig = async (pulledDriver, dealsData) => {
   driver = pulledDriver
   WAIT_TIME = 60000
-  selHelper.init(driver, WAIT_TIME)
-  taskHelper.init(driver, WAIT_TIME)
+  sh = new SelHelper(driver, WAIT_TIME)
+  // SelHelper.init(driver, WAIT_TIME)
+  th = new taskHelper(driver, WAIT_TIME)
 
   // Boolean to determine if the current task has failed
   // let taskFailed = false
@@ -44,7 +46,7 @@ const runWpPreconfig = async (pulledDriver, dealsData) => {
   }
 
   // Login Plesk
-  await selHelper.loginPlesk()
+  await th.loginPlesk()
 
   // looping through buildouts
   for (let i = 0; i < dealsData.length; i++) {
@@ -98,16 +100,7 @@ const runWpPreconfig = async (pulledDriver, dealsData) => {
       failLogs.map(failedDeal => failedDeal.companyName).join(`\n`).red
     )
   } else {
-    console.log(
-      `   _____                      _      _       
-  / ____|                    | |    | |      
- | |     ___  _ __ ___  _ __ | | ___| |_ ___ 
- | |    / _ \\| '_ \` _ \\| '_ \\| |/ _ \\ __/ _ \\
- | |___| (_) | | | | | | |_) | |  __/ ||  __/
-  \\_____\\___/|_| |_| |_| .__/|_|\\___|\\__\\___|
-                       | |                   
-                       |_|                   `.rainbow
-    )
+    console.log(asciiArt.complete.rainbow)
     console.log(
       "All wordpress configurations have been succsefully completed ✓".green
     )
@@ -116,11 +109,11 @@ const runWpPreconfig = async (pulledDriver, dealsData) => {
 
 async function loginWP() {
   // Goto domains
-  await awaitAndClick(By.css(".nav-domains a"))
+  await sh.awaitAndClick(By.css(".nav-domains a"))
   // Enter target domain page
-  await taskHelper.pullUpDomainPageFor(currentDeal.domain)
+  await th.pullUpDomainPageFor(currentDeal.domain)
   // Login to wordpress
-  await awaitAndClick(
+  await sh.awaitAndClick(
     By.xpath(
       `//div[@class="caption-service-toolbar"]/a[contains(text(), "Log In")]`
     )
@@ -133,13 +126,13 @@ async function loginWP() {
 
 async function createHomePage() {
   // Enter Pages page
-  await awaitAndClick(By.id(`menu-pages`))
+  await sh.awaitAndClick(By.id(`menu-pages`))
   // Add new page
-  await awaitAndClick(
+  await sh.awaitAndClick(
     By.xpath(`//div[@class="wrap"]//a[contains(text(), "Add New")]`)
   )
   // Enter "Home" in title
-  await awaitAndSendKeys(By.id("post-title-0"), pageName)
+  await sh.awaitAndSendKeys(By.id("post-title-0"), pageName)
   // Configure settings to work with elementor
   // Disable all sections
   let disableInputs = await driver.findElements(
@@ -149,18 +142,20 @@ async function createHomePage() {
     await disableInputs[i].click()
   }
   // Apply no sidebar
-  await awaitAndClick(By.css(`option[value="no-sidebar"]`))
+  await sh.awaitAndClick(By.css(`option[value="no-sidebar"]`))
   // Apply full width content layout
-  await awaitAndClick(By.css(`option[value="page-builder"]`))
+  await sh.awaitAndClick(By.css(`option[value="page-builder"]`))
 
   // Open page attributes and select Elementor Canvas template
-  await awaitAndClick(By.xpath(`//button[contains(text(), "Page Attributes")]`))
-  await awaitAndClick(By.css(`option[value="elementor_canvas"]`))
+  await sh.awaitAndClick(
+    By.xpath(`//button[contains(text(), "Page Attributes")]`)
+  )
+  await sh.awaitAndClick(By.css(`option[value="elementor_canvas"]`))
   // publish
-  await awaitAndClick(By.css(".editor-post-publish-panel__toggle"))
+  await sh.awaitAndClick(By.css(".editor-post-publish-panel__toggle"))
   // Do it again!
   await driver.sleep(1000)
-  await awaitAndClick(By.css(".editor-post-publish-button"))
+  await sh.awaitAndClick(By.css(".editor-post-publish-button"))
 
   // Wait for page to be published
   await driver.wait(
@@ -175,7 +170,7 @@ async function createHomePage() {
 async function applyElementorPage() {
   // Immplying we're already on the wp edit page for the current page, start elementor buildout
   // Apply elementor
-  await awaitAndClick(By.id("elementor-switch-mode-button"))
+  await sh.awaitAndClick(By.id("elementor-switch-mode-button"))
   // insert template
   let elAddTemplate = By.css(".elementor-add-template-button")
   let elementorIframeLocator = By.id("elementor-preview-iframe")
@@ -198,52 +193,52 @@ async function applyElementorPage() {
 
   await driver.switchTo().defaultContent()
 
-  await awaitAndClick(By.xpath(`//div[contains(text(), "My Templates")]`))
-  await awaitAndClick(
+  await sh.awaitAndClick(By.xpath(`//div[contains(text(), "My Templates")]`))
+  await sh.awaitAndClick(
     By.xpath(
       `//div[contains(text(), "${currentDeal.companyName} Template")]/..//button`
     )
   )
   await driver.sleep(2000) // give it a sec
   // Update the page
-  await awaitAndClick(By.id("elementor-panel-saver-button-publish"))
+  await sh.awaitAndClick(By.id("elementor-panel-saver-button-publish"))
   await driver.wait(
     until.elementLocated(
       By.css("#elementor-panel-saver-button-publish.elementor-disabled")
     )
   )
   // head back out to wp
-  await awaitAndClick(By.css(".elementor-header-button"))
-  await awaitAndClick(By.css(".elementor-panel-menu-item-exit-to-dashboard"))
+  await sh.awaitAndClick(By.css(".elementor-header-button"))
+  await sh.awaitAndClick(By.css(".elementor-panel-menu-item-exit-to-dashboard"))
 }
 
 async function indexHomePage() {
   // Go to settings
-  await awaitAndClick(By.id("menu-settings"))
+  await sh.awaitAndClick(By.id("menu-settings"))
   //TODO: set site title and tagline
   // Go to Reading
-  await awaitAndClick(By.xpath(`//a[contains(text(), "Reading")]`))
+  await sh.awaitAndClick(By.xpath(`//a[contains(text(), "Reading")]`))
   // Click set static homepage
-  await awaitAndClick(By.css(`input[value="page"]`))
+  await sh.awaitAndClick(By.css(`input[value="page"]`))
 
   // Set homepage
-  await awaitAndClick(By.xpath(`//option[contains(text(), "${pageName}")]`))
+  await sh.awaitAndClick(By.xpath(`//option[contains(text(), "${pageName}")]`))
 
   // Save changes
-  await awaitAndClick(By.id("submit"))
+  await sh.awaitAndClick(By.id("submit"))
   // Wait a sec
   await driver.sleep(2000)
 }
 
 async function uploadPlugins() {
   // goto plugins
-  await awaitAndClick(By.id("menu-plugins"))
+  await sh.awaitAndClick(By.id("menu-plugins"))
   // click add new
-  await awaitAndClick(By.css(".page-title-action"))
+  await sh.awaitAndClick(By.css(".page-title-action"))
   // click upload plugin
-  await awaitAndClick(By.css(".upload-view-toggle"))
+  await sh.awaitAndClick(By.css(".upload-view-toggle"))
   // upload file
-  await awaitAndSendKeys(
+  await sh.awaitAndSendKeys(
     By.id("pluginzip"),
     path.resolve("./public/plugins/elementor-pro-2.7.2.zip")
   )
@@ -254,9 +249,9 @@ async function uploadPlugins() {
  */
 async function installTheme() {
   // Open Appareance menu
-  await awaitAndClick(By.id("menu-appearance"))
+  await sh.awaitAndClick(By.id("menu-appearance"))
   // click add new
-  await awaitAndClick(
+  await sh.awaitAndClick(
     By.xpath(`//div[@class="wrap"]//a[contains(text(), "Add New")]`)
   )
   // search for and find astra
@@ -268,33 +263,33 @@ async function installTheme() {
     .sendKeys("Astra", Key.ENTER)
     .perform()
   // Install
-  await awaitAndClick(By.css(`a[aria-label="Install Astra"]`))
+  await sh.awaitAndClick(By.css(`a[aria-label="Install Astra"]`))
   // Activate
-  await awaitAndClick(By.css(`a[aria-label="Activate Astra"]`))
+  await sh.awaitAndClick(By.css(`a[aria-label="Activate Astra"]`))
 }
 
 async function activateAstra() {
   // Open Appareance menu
-  await awaitAndClick(By.id("menu-appearance"))
+  await sh.awaitAndClick(By.id("menu-appearance"))
 
   // Activate
-  await awaitAndClick(By.css(`a[aria-label="Activate Astra"]`))
+  await sh.awaitAndClick(By.css(`a[aria-label="Activate Astra"]`))
 }
 
 async function loginElementor() {
   await driver.get("https://my.elementor.com/login/?redirect_to=%2F")
   // Enter username
-  await awaitAndSendKeys(
+  await sh.awaitAndSendKeys(
     By.id("login-input-email"),
     process.env.ELEMENTOR_LOGIN_USERNAME
   )
   // Enter password
-  await awaitAndSendKeys(
+  await sh.awaitAndSendKeys(
     By.id("login-input-password"),
     process.env.ELEMENTOR_LOGIN_PASSWORD
   )
   // Log in
-  await awaitAndClick(By.css(".elementor-button.elementor-size-md"))
+  await sh.awaitAndClick(By.css(".elementor-button.elementor-size-md"))
   // Verify login
   await driver.wait(
     until.elementLocated(By.css(".e-account-header")),
@@ -303,7 +298,7 @@ async function loginElementor() {
 }
 
 async function connectAndActivateElementor() {
-  await awaitAndClick(By.css(".elementor-button"), 10000)
+  await sh.awaitAndClick(By.css(".elementor-button"), 10000)
 
   try {
     await driver.wait(
@@ -331,17 +326,17 @@ async function connectAndActivateElementor() {
 
 async function importTemplate() {
   // Go to elmentor templates
-  await awaitAndClick(By.id("menu-posts-elementor_library"))
+  await sh.awaitAndClick(By.id("menu-posts-elementor_library"))
   // click import template trigger
   // await driver.sleep(2000) // give it a sec
-  await awaitAndClick(By.id("elementor-import-template-trigger"))
+  await sh.awaitAndClick(By.id("elementor-import-template-trigger"))
   // Enter tempalte
-  await awaitAndSendKeys(
+  await sh.awaitAndSendKeys(
     By.css("#elementor-import-template-form-inputs input"),
     path.resolve("templates", slugify(currentDeal.companyName), "template.json")
   )
   // Submit
-  await awaitAndClick(
+  await sh.awaitAndClick(
     By.css(`#elementor-import-template-form-inputs input[type="submit"]`)
   )
 }

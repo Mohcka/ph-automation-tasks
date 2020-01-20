@@ -1,38 +1,54 @@
 const { until, By } = require("selenium-webdriver")
-const selHelper = require("./selenium-helpers")
-const { awaitAndClick, awaitAndSendKeys } = require("./selenium-helpers")
+const SelHelper = require("./selenium-helpers")
 
-let driver = null,
-  waitTime = null
-/**
- * Initializes variables for use on other functions
- * @param {String} thisDriver - The selenimium webdriver for handling automated webtasks
- * @param {Number} thisWaitTime - Amount of time to wait for each action
- */
-function init(thisDriver, thisWaitTime) { 
-  driver = thisDriver
-  waitTime = thisWaitTime
+class TaskHelper {
+  sh = null
+  constructor(driver, waitTime) {
+    this.driver = driver
+    this.waitTime = waitTime
 
-  selHelper.init(driver, waitTime)
+    this.sh = new SelHelper(driver, waitTime)
+  }
+
+  //* Plesk Helpers
+
+  async pullUpDomainPageFor(domain) {
+    // Enter Domain page
+    await sh.awaitAndClick(By.css(".nav-domains"))
+    await this.driver.wait(
+      until.elementLocated(By.id("domains-list-search-text-domainName")),
+      waitTime
+    )
+    await this.driver
+      .findElement(By.id("domains-list-search-text-domainName"))
+      .clear()
+    await sh.awaitAndSendKeys(
+      By.id("domains-list-search-text-domainName"),
+      domain
+    )
+    await this.driver.findElement(By.css(".search-field em")).click()
+
+    await this.driver.sleep(2000)
+    await sh.awaitAndClick(By.css("#domains-list-container .odd td a"))
+  }
+
+  async loginPlesk() {
+    // Enter plesk server
+    await this.driver.get("https://dh52-ylwp.accessdomain.com:8443/")
+
+    await awaitAndSendKeys(
+      By.css("#loginSection-username"),
+      process.env.PLESK_USERNAME
+    )
+
+    // Enter passwaored
+    await this.driver
+      .findElement(By.css("#loginSection-password"))
+      .sendKeys(process.env.PLESK_PASSWORD)
+
+    // Submit
+    await this.driver.findElement(By.css("#btn-send")).click()
+  }
 }
 
-/**
- * Enter text into the domain search field to pull up its page
- * @param {String} domain - The domain to be searched
- */
-async function pullUpDomainPageFor(domain){
-  // Enter Domain page
-  await awaitAndClick(By.css(".nav-domains"))
-  await driver.wait(
-    until.elementLocated(By.id("domains-list-search-text-domainName")),
-    waitTime
-  )
-  await driver.findElement(By.id("domains-list-search-text-domainName")).clear()
-  await awaitAndSendKeys(By.id("domains-list-search-text-domainName"), domain)
-  await driver.findElement(By.css(".search-field em")).click()
-
-  await driver.sleep(2000)
-  await awaitAndClick(By.css("#domains-list-container .odd td a"))
-}
-
-module.exports = { init, pullUpDomainPageFor }
+module.exports = TaskHelper

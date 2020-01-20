@@ -1,4 +1,5 @@
 const axios = require("axios")
+const colors = require("colors")
 
 const company_names = require("./data/company_names.json").company_names
 
@@ -29,11 +30,18 @@ async function getData() {
       )
       .then(res => {
         // console.log(res)
+        let domain = res.data.entries[0].custom_fields.custom_label_1454434
+          ? res.data.entries[0].custom_fields.custom_label_1454434.toLowerCase()
+          : res.data.entries[0].custom_fields.custom_label_1454434
+        let bsnEmail = res.data.entries[0].custom_fields.custom_label_1585966
+          ? res.data.entries[0].custom_fields.custom_label_1585966.toLowerCase()
+          : res.data.entries[0].custom_fields.custom_label_1585966
+
         plData.push({
           companyName: res.data.entries[0].company.name,
           company: res.data.entries[0].company,
-          domain: res.data.entries[0].custom_fields.custom_label_1454434.toLowerCase(),
-          bsnsEmail: res.data.entries[0].custom_fields.custom_label_1585966.toLowerCase(),
+          domain: domain,
+          bsnsEmail: bsnEmail,
           phone: res.data.entries[0].custom_fields.custom_label_1585963,
           serviceArea: res.data.entries[0].custom_fields.custom_label_1585981,
           webDesc: res.data.entries[0].custom_fields.custom_label_3038791,
@@ -45,6 +53,8 @@ async function getData() {
         })
       })
   }
+
+  console.log("PipelinDeals data has been fetched ✓".green)
 
   return plData
 }
