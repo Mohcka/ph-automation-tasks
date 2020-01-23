@@ -21,6 +21,7 @@
     "geckodriver": "^1.19.1",
     "googleapis": "^47.0.0",
     "moment": "^2.24.0",
+    "ora": "^4.0.3",
     "prompts": "^2.3.0",
     "selenium-webdriver": "^4.0.0-alpha.5",
     "superagent": "^5.2.1"
