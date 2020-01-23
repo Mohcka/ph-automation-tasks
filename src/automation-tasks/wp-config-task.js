@@ -8,6 +8,7 @@ const { runTemplateGen } = require("../template-generator")
 const { slugify } = require("../utils/text-utils")
 
 const colors = require("colors")
+const ora = require("ora")
 const asciiArt = require("../utils/ascii-art")
 
 let driver = null
@@ -20,6 +21,7 @@ let pageName = "Home"
 
 let failLogs = []
 let sh, th
+const spinner = ora("Loading...")
 
 /**
  * Main function to run the prebuildout tasks
@@ -32,6 +34,9 @@ const runWpPreconfig = async (pulledDriver, dealsData) => {
   sh = new SelHelper(driver, WAIT_TIME)
   // SelHelper.init(driver, WAIT_TIME)
   th = new taskHelper(driver, WAIT_TIME)
+  spinner.color = "cyan"
+  spinner.spinner = "dots"
+  spinner.start()
 
   // Boolean to determine if the current task has failed
   // let taskFailed = false
@@ -52,10 +57,12 @@ const runWpPreconfig = async (pulledDriver, dealsData) => {
   for (let i = 0; i < dealsData.length; i++) {
     try {
       currentDeal = dealsData[i]
+      spinner.text = `Now working on ${currentDeal.companyName}`
       // currentDeal.domain = "getpagehubgrid.com" // For testing purposes
 
       // Login deal wordpress
       await loginWP()
+      await catchNonSecuredWebsitePage()
 
       // Activate Elementor Pro
       try {
@@ -71,14 +78,13 @@ const runWpPreconfig = async (pulledDriver, dealsData) => {
       await importTemplate()
 
       try {
-        // await activateAstra()
+        await activateAstra()
       } catch (err) {
         console.log(
           "Astra activation failed.  It may have already be installed".yellow
         )
       }
       // Upload elementor
-      // await uploadPlugins()
       // Creating homepage
       await createHomePage()
 
@@ -93,6 +99,7 @@ const runWpPreconfig = async (pulledDriver, dealsData) => {
       await restart()
     }
   }
+  spinner.stop()
 
   if (failLogs.length > 0) {
     console.log(`The following deals have failed:`.yellow)
@@ -339,6 +346,21 @@ async function importTemplate() {
   await sh.awaitAndClick(
     By.css(`#elementor-import-template-form-inputs input[type="submit"]`)
   )
+}
+
+async function catchNonSecuredWebsitePage() {
+  try {
+    await driver.wait(
+      until.elementLocated(By.css(".interstitial-wrapper")),
+      2000
+    )
+    await sh.awaitAndClick(By.id("details-button"))
+    await sh.awaitAndClick(By.id("proceed-link"))
+
+    console.log(
+      `${currentDeal.companyName} (${currentDeal.domain}) was not secured`.red
+    )
+  } catch (err) {}
 }
 
 /**

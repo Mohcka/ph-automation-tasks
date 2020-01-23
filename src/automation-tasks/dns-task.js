@@ -2,12 +2,13 @@ const { By, until } = require("selenium-webdriver")
 const colors = require("colors")
 
 const selHelper = require("../utils/selenium-helpers")
+const TaskHelper = require("../utils/task-helpers")
 
 const asciiArt = require("../utils/ascii-art")
 
 class DNSTask {
   loginDomain = "https://ap.www.namecheap.com/" // Default login domain for namecheap
-  waitTime = 60000 // Default delay for an element to be found by the webdriver
+  waitTime = 20000 // Default delay for an element to be found by the webdriver
   currentDeal = null // data of a single deal from the pipelinedeals api
   failedDeals = []
   sh
@@ -68,7 +69,7 @@ class DNSTask {
         )
         // Set name servers
         await this.sh.awaitAndClick(
-          By.xpath(`//*[contains(text(), "Namecheap BasicDNS")]/..`)
+          By.css("div.nameservers-row a.select2-choice")
         )
         await this.sh.awaitAndClick(
           By.xpath(`//div[contains(text(), "Custom DNS")]`)
@@ -82,6 +83,7 @@ class DNSTask {
           "ns2.mediatemple.net"
         )
         await this.sh.awaitAndClick(By.css(".save"))
+        await this.driver.sleep(3000)
         // Go backto domain list
         await this.sh.awaitAndClick(By.css(".domains"))
       } catch (err) {
@@ -93,20 +95,7 @@ class DNSTask {
       }
     }
 
-    console.log(asciiArt.complete.rainbow)
-
-    if (this.failedDeals.length > 0) {
-      console.log("The following deals have failed".yellow)
-      console.log(
-        this.failedDeals
-          .map(failedDeal => `${failedDeal.companyName} - ${failedDeal.domain}`)
-          .join(`\n`).red
-      )
-    } else {
-      console.log(
-        "All the domains have had their DNS pointed succesfully!".green
-      )
-    }
+    TaskHelper.prototype.logCompletedFeedback(this.failedDeals)
   }
 }
 

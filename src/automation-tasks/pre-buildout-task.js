@@ -1,5 +1,7 @@
 const { By, Key, until } = require("selenium-webdriver")
+const axios = require("axios")
 
+const ora = require("ora")
 const colors = require("colors")
 const asciiArt = require("../utils/ascii-art")
 
@@ -15,16 +17,20 @@ let failedDeals = []
 let sh = null,
   th = null
 
+const spinner = ora("Loading...")
+
 /**
  * Main function to run the prebuildout tasks
  * @param {Builder} pulleDriver -
  * @param {Array}   domainList  - list of domains to create throuh plesk
  */
 const runPreBuildout = async (pulledDriver, dealList) => {
+  spinner.color = "cyan"
+  spinner.spinner = "dots"
+  spinner.start()
   driver = pulledDriver
-  WAIT_TIME = 20000
+  WAIT_TIME = 60000
   sh = new selHelper(driver, WAIT_TIME)
-  // selHelper.init(driver, WAIT_TIME)
   th = new TaskHelper(driver, WAIT_TIME)
   await driver.get("https://dh52-ylwp.accessdomain.com:8443/")
 
@@ -34,11 +40,13 @@ const runPreBuildout = async (pulledDriver, dealList) => {
   // looping through buildouts
   for (let i = 0; i < dealList.length; i++) {
     currentDeal = dealList[i]
+    spinner.text = `Currently Working on ${currentDeal.companyName}`
     // currentDeal.domain = "example.com"
 
     try {
       await createNewDomain()
       await installWordpress()
+      await switchPLStageToBuildout()
       // await addTheme()
     } catch (err) {
       failedDeals.push(currentDeal)
@@ -48,6 +56,8 @@ const runPreBuildout = async (pulledDriver, dealList) => {
       await driver.get("https://dh52-ylwp.accessdomain.com:8443/")
     }
   }
+
+  spinner.stop()
 
   if (failedDeals.length > 0) {
     console.log(`The following deals have failed:`.yellow)
@@ -125,7 +135,7 @@ async function installWordpress() {
   )
   // Enter username
   let usernameElement = await driver.findElement(
-    By.xpath(`//input[@name="adminUserPassword"]`)
+    By.xpath(`//input[@name="adminUserName"]`)
   )
   await driver
     .actions()
@@ -156,6 +166,23 @@ async function installWordpress() {
   await sh.awaitAndClick(
     By.xpath(`//span[contains(text(), "No, thanks")]/../..`)
   )
+}
+
+async function switchPLStageToBuildout() {
+  await axios({
+    method: "put",
+    url: `${process.env.PIPELINE_DEALS_API_URL}/deals/${currentDeal.id}.json?api_key=${process.env.PIPELINE_DEALS_API_KEY}`,
+    transformRequest: [
+      (data, headers) => {
+        let transformedData = `deal[custom_fields[custom_label_1585894]]=${data["deal[custom_fields[custom_label_1585894]]"]}`
+
+        return transformedData
+      },
+    ],
+    data: {
+      "deal[custom_fields[custom_label_1585894]]": 3410758,
+    },
+  })
 }
 
 async function addTheme() {
