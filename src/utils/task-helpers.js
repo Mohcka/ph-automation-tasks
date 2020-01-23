@@ -1,6 +1,9 @@
 const { until, By } = require("selenium-webdriver")
 const SelHelper = require("./selenium-helpers")
 
+const asciiArt = require("./ascii-art")
+const colors = require("colors")
+
 class TaskHelper {
   sh = null
   constructor(driver, waitTime) {
@@ -14,29 +17,29 @@ class TaskHelper {
 
   async pullUpDomainPageFor(domain) {
     // Enter Domain page
-    await sh.awaitAndClick(By.css(".nav-domains"))
+    await this.sh.awaitAndClick(By.css(".nav-domains"))
     await this.driver.wait(
       until.elementLocated(By.id("domains-list-search-text-domainName")),
-      waitTime
+      this.waitTime
     )
     await this.driver
       .findElement(By.id("domains-list-search-text-domainName"))
       .clear()
-    await sh.awaitAndSendKeys(
+    await this.sh.awaitAndSendKeys(
       By.id("domains-list-search-text-domainName"),
       domain
     )
     await this.driver.findElement(By.css(".search-field em")).click()
 
     await this.driver.sleep(2000)
-    await sh.awaitAndClick(By.css("#domains-list-container .odd td a"))
+    await this.sh.awaitAndClick(By.css("#domains-list-container .odd td a"))
   }
 
   async loginPlesk() {
     // Enter plesk server
     await this.driver.get("https://dh52-ylwp.accessdomain.com:8443/")
 
-    await awaitAndSendKeys(
+    await this.sh.awaitAndSendKeys(
       By.css("#loginSection-username"),
       process.env.PLESK_USERNAME
     )
@@ -48,6 +51,24 @@ class TaskHelper {
 
     // Submit
     await this.driver.findElement(By.css("#btn-send")).click()
+  }
+
+  logCompletedFeedback(
+    failedDeals,
+    successMsg = "All tasks processed succsefully"
+  ) {
+    console.log(asciiArt.complete.rainbow)
+
+    if (failedDeals.length > 0) {
+      console.log("The following deals have failed".yellow)
+      console.log(
+        failedDeals
+          .map(failedDeal => `${failedDeal.companyName} - ${failedDeal.domain}`)
+          .join(`\n`).red
+      )
+    } else {
+      console.log(successMsg.green)
+    }
   }
 }
 
