@@ -20,39 +20,45 @@ const company_names = require("./data/company_names.json").company_names
  */
 async function getData() {
   let plData = []
+  let idList = company_names
+    .map(listItem => listItem.match(/- (\d+)/)[1])
+    .join(",")
 
-  for (let i = 0; i < company_names.length; i++) {
-    const company_name = company_names[i]
+  // console.log(idList)
 
-    await axios
-      .get(
-        `${process.env.PIPELINE_DEALS_API_URL}/deals.json?api_key=${process.env.PIPELINE_DEALS_API_KEY}&conditions[person_company_name]=${company_name}`
-      )
-      .then(res => {
-        // console.log(res)
-        let domain = res.data.entries[0].custom_fields.custom_label_1454434
-          ? res.data.entries[0].custom_fields.custom_label_1454434.toLowerCase()
-          : res.data.entries[0].custom_fields.custom_label_1454434
-        let bsnEmail = res.data.entries[0].custom_fields.custom_label_1585966
-          ? res.data.entries[0].custom_fields.custom_label_1585966.toLowerCase()
-          : res.data.entries[0].custom_fields.custom_label_1585966
+  await axios
+    .get(
+      `${process.env.PIPELINE_DEALS_API_URL}/deals.json?api_key=${process.env.PIPELINE_DEALS_API_KEY}&conditions[deal_id]=${idList}`
+    )
+    .then(res => {
+      // console.log(res.data.entries.length)
+      let entries = res.data.entries
+      for (let i = 0; i < entries.length; i++) {
+        // console.log(res.data.entries)
+        let domain = entries[i].custom_fields.custom_label_1454434
+          ? entries[i].custom_fields.custom_label_1454434.toLowerCase()
+          : entries[i].custom_fields.custom_label_1454434
+        let bsnEmail = entries[i].custom_fields.custom_label_1585966
+          ? entries[i].custom_fields.custom_label_1585966.toLowerCase()
+          : entries[i].custom_fields.custom_label_1585966
 
         plData.push({
-          companyName: res.data.entries[0].company.name,
-          company: res.data.entries[0].company,
+          id: entries[i].id,
+          companyName: entries[i].company.name,
+          company: entries[i].company,
           domain: domain,
           bsnsEmail: bsnEmail,
-          phone: res.data.entries[0].custom_fields.custom_label_1585963,
-          serviceArea: res.data.entries[0].custom_fields.custom_label_1585981,
-          webDesc: res.data.entries[0].custom_fields.custom_label_3038791,
-          hours: res.data.entries[0].custom_fields.custom_label_1454392,
-          primaryPhrase: res.data.entries[0].custom_fields.custom_label_1807174,
-          keywords: res.data.entries[0].custom_fields.custom_label_1454401,
-          gmbAddress: res.data.entries[0].custom_fields.custom_label_1454398,
-          facebookDesc: res.data.entries[0].custom_fields.custom_label_1486885,
+          phone: entries[i].custom_fields.custom_label_1585963,
+          serviceArea: entries[i].custom_fields.custom_label_1585981,
+          webDesc: entries[i].custom_fields.custom_label_3038791,
+          hours: entries[i].custom_fields.custom_label_1454392,
+          primaryPhrase: entries[i].custom_fields.custom_label_1807174,
+          keywords: entries[i].custom_fields.custom_label_1454401,
+          gmbAddress: entries[i].custom_fields.custom_label_1454398,
+          facebookDesc: entries[i].custom_fields.custom_label_1486885,
         })
-      })
-  }
+      }
+    })
 
   console.log("PipelinDeals data has been fetched ✓".green)
 
