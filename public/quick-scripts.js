@@ -4,6 +4,8 @@
   .map(company_link => company_link.innerText)
   .join("\n");
 
+[...document.querySelectorAll("tr[data-cypress]")].map(item => `${item.querySelector("td[data-column='deal_company_name'] a").innerText} - ${item.getAttribute("data-id")}`).join("\n")
+
 //* Utilities
 // Standard xpath script
 document.evaluate(`//*`, document, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue
