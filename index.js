@@ -13,6 +13,7 @@ const { getData } = require("./src/fetch-pipeline-data")
 const { runPreBuildout } = require("./src/automation-tasks/pre-buildout-task")
 const { runWpPreconfig } = require("./src/automation-tasks/wp-config-task")
 const DNSTask = require("./src/automation-tasks/dns-task")
+const MTZoneFileTask = require("./src/automation-tasks/mt-zonefile-task")
 
 const asciiArt = require("./src/utils/ascii-art")
 
@@ -27,11 +28,9 @@ const runAutomation = async () => {
     await intialPrompt()
     await createWebDriver()
     await run()
-
   } finally {
     await driver.quit()
   }
-  
 }
 
 async function createWebDriver() {
@@ -45,7 +44,7 @@ async function createWebDriver() {
   await driver
     .manage()
     .window()
-    .setRect({ width: 1200, height: 880, x: 0, y: 0 })
+    .setRect({ width: 1400, height: 980, x: 0, y: 0 })
 }
 
 // Start running automation tasks
@@ -61,11 +60,14 @@ const run = async () => {
     case 3:
       await runPreBuildout(driver, plData)
       break
-    case 2:
+    case 4:
       await runWpPreconfig(driver, plData)
       break
-    case 1:
+    case 2:
       await new DNSTask(driver, plData).runTask()
+      break
+    case 1:
+      await new MTZoneFileTask(driver, plData).runTask()
       break
     default:
       console.log(
@@ -81,9 +83,10 @@ async function intialPrompt() {
   const choicesPromptText = `
 Please select a buildout process.  All buildouts to run are received from the company_names.json file.  
 If you already haven't done so, please enter the data into that file with the desired deals to proces buildouts for.
-1. Point NameCheap nameservers
-2. Website Purchase
-3. Buildout
+1. Create DNS zonefiles
+2. Point Nameservers
+3. Website Purchase
+4. Buildout
 (Select a Number):`.cyan
   const choicePrompt = await prompts({
     type: "number",
