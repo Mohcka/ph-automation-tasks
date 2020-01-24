@@ -17,11 +17,11 @@ let failedDeals = []
 let sh = null,
   th = null
 
-const spinner = ora("Loading...")
+const spinner = ora("Stand by...")
 
 /**
  * Main function to run the prebuildout tasks
- * @param {Builder} pulleDriver -
+ * @param {Builder} pulleDriver - Webdriver that will automate webtasks
  * @param {Array}   domainList  - list of domains to create throuh plesk
  */
 const runPreBuildout = async (pulledDriver, dealList) => {
@@ -56,8 +56,8 @@ const runPreBuildout = async (pulledDriver, dealList) => {
       await driver.get("https://dh52-ylwp.accessdomain.com:8443/")
     }
   }
-
-  spinner.stop()
+  spinner.text = "Complete"
+  spinner.succeed()
 
   if (failedDeals.length > 0) {
     console.log(`The following deals have failed:`.yellow)
@@ -83,7 +83,7 @@ async function createNewDomain() {
   // Username
   await sh.awaitAndSendKeys(
     By.id(`domainInfo-userName`),
-    currentDeal.domain.match(/(.*)\./)[1]
+    currentDeal.domain.match(/([a-z]*)\./)[1]
   )
   // Password
   await sh.awaitAndSendKeys(
