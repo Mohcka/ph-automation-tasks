@@ -18,10 +18,15 @@
     "axios": "^0.19.1",
     "chromedriver": "^79.0.0",
     "dotenv": "^8.2.0",
+    "colors": "^1.4.0",
+    "moment": "^2.24.0",
+    "ora": "^4.0.3",
     "geckodriver": "^1.19.1",
     "selenium-webdriver": "^4.0.0-alpha.5"
   },
   "devDependencies": {
+    "@types/colors": "^1.2.1",
+    "@types/prompts": "^2.0.3",
     "@types/dotenv": "^8.2.0",
     "@types/selenium-webdriver": "^4.0.6",
     "prettier": "^1.19.1",
