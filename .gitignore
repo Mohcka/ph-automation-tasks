@@ -3,4 +3,7 @@ node_modules
 src/data/*
 debug.log
 .vscode
+*.log
 built
+
+templates
