@@ -1,7 +1,11 @@
 node_modules
 package-lock.json
 .env
-src/data/*
+
+token.json
+credentials.json
+company_names.json
+
 debug.log
 .vscode
 *.log
