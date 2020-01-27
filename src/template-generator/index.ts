@@ -4,11 +4,11 @@ import path from "path"
 import moment from "moment"
 
 import { PipelineDataCollection, PipelineDataEntry } from "../DealDataFetcher"
-import KeywordDataFetcher from "./gsheets-fetch-keywords"
+import KeywordDataFetcher from "./KeywordDataFetcher"
 import { google, customsearch_v1 } from "googleapis"
 
-import TextUtils from "../utils/text-utils"
-import Helpers from "../utils/helpers"
+import TextUtils from "../utils/TextUtils"
+import Helpers from "../utils/Helpers"
 
 interface ParsedPipelineEntry extends PipelineDataEntry {
   email: string

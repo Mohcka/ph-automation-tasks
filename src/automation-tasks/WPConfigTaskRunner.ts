@@ -8,7 +8,7 @@ import { PipelineDataCollection, PipelineDataEntry } from "../DealDataFetcher"
 import SeleniumHelper from "../utils/SeleniumHelper"
 import TaskHelper from "../utils/TaskHelper"
 
-import TextUtils from "../utils/text-utils"
+import TextUtils from "../utils/TextUtils"
 import AsciiArt from "../utils/AsciiArt"
 
 export default class WPConfigTaskRunner {
