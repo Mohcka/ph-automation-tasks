@@ -1,31 +1,33 @@
 {
-  "name": "auto-buildout-1",
+  "name": "typescript-attempt",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "test.js",
   "scripts": {
-    "start": "node index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "tsc": "tsc",
+    "start": "ts-node index.ts"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
+  "devDependencies": {
+    "@types/prompts": "^2.0.3",
+    "tslint-config-prettier": "^1.18.0",
+    "typescript": "^3.7.5"
+  },
   "dependencies": {
-    "axios": "^0.19.1",
+    "@types/chromedriver": "^2.38.0",
+    "@types/colors": "^1.2.1",
+    "@types/selenium-webdriver": "^4.0.6",
+    "axios": "^0.19.2",
     "chromedriver": "^79.0.0",
     "colors": "^1.4.0",
     "dotenv": "^8.2.0",
-    "eslint-config-prettier": "^4.1.0",
-    "eslint-plugin-prettier": "^3.0.1",
-    "geckodriver": "^1.19.1",
     "googleapis": "^47.0.0",
     "moment": "^2.24.0",
     "ora": "^4.0.3",
     "prompts": "^2.3.0",
-    "selenium-webdriver": "^4.0.0-alpha.5",
-    "superagent": "^5.2.1"
-  },
-  "devDependencies": {
-    "eslint": "^6.8.0"
+    "selenium-webdriver": "^4.0.0-alpha.5"
   }
 }

@@ -1,4 +1,4 @@
-module.exports = {
+export default {
   complete: `   _____                      _      _       
   / ____|                    | |    | |      
  | |     ___  _ __ ___  _ __ | | ___| |_ ___ 

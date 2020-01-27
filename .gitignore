@@ -1,11 +1,14 @@
 node_modules
 package-lock.json
 .env
-debug.log
-built
-logs
-templates
 
-
-credentials.json
 token.json
+credentials.json
+company_names.json
+
+debug.log
+.vscode
+*.log
+built
+
+templates
