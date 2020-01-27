@@ -52,7 +52,11 @@ class TaskHelper {
     // Submit
     await this.driver.findElement(By.css("#btn-send")).click()
   }
-
+  /**
+   * 
+   * @param {*} failedDeals 
+   * @param {*} successMsg 
+   */
   logCompletedFeedback(
     failedDeals,
     successMsg = "All tasks processed succsefully"

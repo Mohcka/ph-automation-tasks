@@ -1,12 +1,13 @@
 require("dotenv").config()
 
-const path = require("path")
+// const path = require("path")
 
 const webdriver = require("selenium-webdriver")
 const chrome = require("selenium-webdriver/chrome")
 const chromePath = require("chromedriver").path
 
 const prompts = require("prompts")
+// eslint-disable-next-line no-unused-vars
 const colors = require("colors")
 
 const { getData } = require("./src/fetch-pipeline-data")
@@ -97,18 +98,18 @@ If you already haven't done so, please enter the data into that file with the de
   choice = choicePrompt.choice
 }
 
-async function buildPrompts() {
-  const buildoutPromptText = `
-Please select a buildout process...
-`
+// async function buildPrompts() {
+//   const buildoutPromptText = `
+// Please select a buildout process...
+// `
 
-  const choicePrompt = await prompts({
-    type: "number",
-    name: "buldoutAction",
-    message: buildoutPromptText,
-  })
+//   const choicePrompt = await prompts({
+//     type: "number",
+//     name: "buldoutAction",
+//     message: buildoutPromptText,
+//   })
 
-  choice = choicePrompt.buldoutAction
-}
+//   choice = choicePrompt.buldoutAction
+// }
 
 module.exports.runAutomation = runAutomation()
