@@ -9,7 +9,6 @@ import colors from "colors"
 
 import { PipelineDataCollection, PipelineDataEntry } from "../DealDataFetcher"
 
-import SeleniumHelper from "../utils/SeleniumHelper"
 import TaskHelper from "../utils/TaskHelper"
 import AsciiArt from "../utils/AsciiArt"
 
@@ -23,7 +22,6 @@ export default class PrebuildoutTaskRunner {
 
   private spinner: Ora
 
-  private sh: SeleniumHelper
   private th: TaskHelper
 
   constructor(driver: WebDriver, plData: PipelineDataCollection) {
@@ -34,7 +32,6 @@ export default class PrebuildoutTaskRunner {
 
     this.failedDeals = []
 
-    this.sh = new SeleniumHelper(this.driver, this.waitTime)
     this.th = new TaskHelper(this.driver, this.waitTime)
   }
 
@@ -87,31 +84,31 @@ export default class PrebuildoutTaskRunner {
    */
   private async createNewDomain(): Promise<void> {
     // Goto domains
-    await this.sh.awaitAndClick(By.css(".nav-domains a"))
+    await this.th.awaitAndClick(By.css(".nav-domains a"))
     // Create new domain
-    await this.sh.awaitAndClick(By.css("#buttonAddDomain"))
+    await this.th.awaitAndClick(By.css("#buttonAddDomain"))
     // ##Enter Info
     // Domain name
-    await this.sh.awaitAndSendKeys(By.id(`domainName-name`), [
+    await this.th.awaitAndSendKeys(By.id(`domainName-name`), [
       this.currentDeal.domain,
     ])
     // Username
-    await this.sh.awaitAndSendKeys(By.id(`domainInfo-userName`), [
+    await this.th.awaitAndSendKeys(By.id(`domainInfo-userName`), [
       this.currentDeal.domain.match(/([a-z]*)\./)![1],
     ])
     // Password
-    await this.sh.awaitAndSendKeys(By.id(`domainInfo-password`), [
+    await this.th.awaitAndSendKeys(By.id(`domainInfo-password`), [
       `${process.env.DOMAIN_ADMIN_PASSWORD}`,
     ])
     // Password Again
-    await this.sh.awaitAndSendKeys(By.id(`domainInfo-passwordConfirmation`), [
+    await this.th.awaitAndSendKeys(By.id(`domainInfo-passwordConfirmation`), [
       `${process.env.DOMAIN_ADMIN_PASSWORD}`,
     ])
     // Let's encrypt it
-    await this.sh.awaitAndClick(By.id("sslit-enabled"))
+    await this.th.awaitAndClick(By.id("sslit-enabled"))
 
     // Submit domain
-    await this.sh.awaitAndClick(By.id("btn-send"))
+    await this.th.awaitAndClick(By.id("btn-send"))
   }
 
   private async installWordpress(): Promise<void> {
@@ -124,25 +121,25 @@ export default class PrebuildoutTaskRunner {
     await this.driver
       .findElement(By.id("domains-list-search-text-domainName"))
       .clear()
-    await this.sh.awaitAndSendKeys(
+    await this.th.awaitAndSendKeys(
       By.id("domains-list-search-text-domainName"),
       [this.currentDeal.domain]
     )
     await this.driver.findElement(By.css(".search-field em")).click()
 
     await this.driver.sleep(2000)
-    await this.sh.awaitAndClick(By.css("#domains-list-container .odd td a"))
+    await this.th.awaitAndClick(By.css("#domains-list-container .odd td a"))
 
     // Initiate wordpress install
-    await this.sh.awaitAndClick(By.css(".btn.js-wp-install"))
+    await this.th.awaitAndClick(By.css(".btn.js-wp-install"))
     // Select Elementor Plugin Set
-    await this.sh.awaitAndClick(
+    await this.th.awaitAndClick(
       By.xpath(`//select/option[contains(text(), "Elementor")]`)
     )
 
     // Enter Title
     await this.driver.findElement(By.xpath(`//input[@name="title"]`)).clear()
-    await this.sh.awaitAndSendKeys(By.xpath(`//input[@name="title"]`), [
+    await this.th.awaitAndSendKeys(By.xpath(`//input[@name="title"]`), [
       this.currentDeal.companyName,
     ])
     // Enter username
@@ -166,12 +163,12 @@ export default class PrebuildoutTaskRunner {
       .perform()
 
     // Install
-    await this.sh.awaitAndClick(
+    await this.th.awaitAndClick(
       By.css(`button[data-test-id="instance-install-form-submit-button"]`)
     )
 
     // Installation complete, close prompt
-    await this.sh.awaitAndClick(
+    await this.th.awaitAndClick(
       By.xpath(`//span[contains(text(), "No, thanks")]/../..`)
     )
   }

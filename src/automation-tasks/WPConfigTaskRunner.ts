@@ -5,7 +5,6 @@ import ora = require("ora")
 
 import TemplateGenerator from "../template-generator"
 import { PipelineDataCollection, PipelineDataEntry } from "../DealDataFetcher"
-import SeleniumHelper from "../utils/SeleniumHelper"
 import TaskHelper from "../utils/TaskHelper"
 
 import TextUtils from "../utils/TextUtils"
@@ -20,7 +19,6 @@ export default class WPConfigTaskRunner {
   private failedDeals: PipelineDataCollection
   private unsecruedDomains: PipelineDataCollection
 
-  private sh: SeleniumHelper
   private th: TaskHelper
 
   private spinner: Ora
@@ -34,7 +32,6 @@ export default class WPConfigTaskRunner {
     this.failedDeals = []
     this.unsecruedDomains = []
 
-    this.sh = new SeleniumHelper(this.driver, this.waitTime)
     this.th = new TaskHelper(this.driver, this.waitTime)
 
     this.spinner = ora("Stand By...")
@@ -112,11 +109,11 @@ export default class WPConfigTaskRunner {
 
   private async loginWP(): Promise<void> {
     // Goto domains
-    await this.sh.awaitAndClick(By.css(".nav-domains a"))
+    await this.th.awaitAndClick(By.css(".nav-domains a"))
     // Enter target domain page
     await this.th.pullUpDomainPageFor(this.currentDeal.domain)
     // Login to wordpress
-    await this.sh.awaitAndClick(
+    await this.th.awaitAndClick(
       By.xpath(
         `//div[@class="caption-service-toolbar"]/a[contains(text(), "Log In")]`
       )
@@ -129,13 +126,13 @@ export default class WPConfigTaskRunner {
 
   private async createHomePage(): Promise<void> {
     // Enter Pages page
-    await this.sh.awaitAndClick(By.id(`menu-pages`))
+    await this.th.awaitAndClick(By.id(`menu-pages`))
     // Add new page
-    await this.sh.awaitAndClick(
+    await this.th.awaitAndClick(
       By.xpath(`//div[@class="wrap"]//a[contains(text(), "Add New")]`)
     )
     // Enter "Home" in title
-    await this.sh.awaitAndSendKeys(By.id("post-title-0"), [this.pageName])
+    await this.th.awaitAndSendKeys(By.id("post-title-0"), [this.pageName])
     // Configure settings to work with elementor
     // Disable all sections
     const disableInputs = await this.driver.findElements(
@@ -145,20 +142,20 @@ export default class WPConfigTaskRunner {
       await disableInputEl.click()
     }
     // Apply no sidebar
-    await this.sh.awaitAndClick(By.css(`option[value="no-sidebar"]`))
+    await this.th.awaitAndClick(By.css(`option[value="no-sidebar"]`))
     // Apply full width content layout
-    await this.sh.awaitAndClick(By.css(`option[value="page-builder"]`))
+    await this.th.awaitAndClick(By.css(`option[value="page-builder"]`))
 
     // Open page attributes and select Elementor Canvas template
-    await this.sh.awaitAndClick(
+    await this.th.awaitAndClick(
       By.xpath(`//button[contains(text(), "Page Attributes")]`)
     )
-    await this.sh.awaitAndClick(By.css(`option[value="elementor_canvas"]`))
-    // publithis.sh
-    await this.sh.awaitAndClick(By.css(".editor-post-publish-panel__toggle"))
+    await this.th.awaitAndClick(By.css(`option[value="elementor_canvas"]`))
+    // publithis.th
+    await this.th.awaitAndClick(By.css(".editor-post-publish-panel__toggle"))
     // Do it again!
     await this.driver.sleep(1000)
-    await this.sh.awaitAndClick(By.css(".editor-post-publish-button"))
+    await this.th.awaitAndClick(By.css(".editor-post-publish-button"))
 
     // Wait for page to be published
     await this.driver.wait(
@@ -173,7 +170,7 @@ export default class WPConfigTaskRunner {
   private async applyElementorPage(): Promise<void> {
     // Immplying we're already on the wp edit page for the current page, start elementor buildout
     // Apply elementor
-    await this.sh.awaitAndClick(By.id("elementor-switch-mode-button"))
+    await this.th.awaitAndClick(By.id("elementor-switch-mode-button"))
     // insert template
     const elAddTemplate = By.css(".elementor-add-template-button")
     const elementorIframeLocator = By.id("elementor-preview-iframe")
@@ -198,59 +195,59 @@ export default class WPConfigTaskRunner {
 
     await this.driver.switchTo().defaultContent()
 
-    await this.sh.awaitAndClick(
+    await this.th.awaitAndClick(
       By.xpath(`//div[contains(text(), "My Templates")]`)
     )
-    await this.sh.awaitAndClick(
+    await this.th.awaitAndClick(
       By.xpath(
         `//div[contains(text(), "${this.currentDeal.companyName} Template")]/..//button`
       )
     )
     await this.driver.sleep(2000) // give it a sec
     // Update the page
-    await this.sh.awaitAndClick(By.id("elementor-panel-saver-button-publish"))
+    await this.th.awaitAndClick(By.id("elementor-panel-saver-button-publish"))
     await this.driver.wait(
       until.elementLocated(
         By.css("#elementor-panel-saver-button-publish.elementor-disabled")
       )
     )
     // head back out to wp
-    await this.sh.awaitAndClick(By.css(".elementor-header-button"))
-    await this.sh.awaitAndClick(
+    await this.th.awaitAndClick(By.css(".elementor-header-button"))
+    await this.th.awaitAndClick(
       By.css(".elementor-panel-menu-item-exit-to-dashboard")
     )
   }
 
   private async indexHomePage(): Promise<void> {
     // Go to settings
-    await this.sh.awaitAndClick(By.id("menu-settings"))
+    await this.th.awaitAndClick(By.id("menu-settings"))
     // TODO: set site title and tagline
     // Go to Reading
-    await this.sh.awaitAndClick(By.xpath(`//a[contains(text(), "Reading")]`))
+    await this.th.awaitAndClick(By.xpath(`//a[contains(text(), "Reading")]`))
     // Click set static homepage
-    await this.sh.awaitAndClick(By.css(`input[value="page"]`))
+    await this.th.awaitAndClick(By.css(`input[value="page"]`))
 
     // Set homepage
-    await this.sh.awaitAndClick(
+    await this.th.awaitAndClick(
       By.xpath(`//option[contains(text(), "${this.pageName}")]`)
     )
 
     // Save changes
-    await this.sh.awaitAndClick(By.id("submit"))
+    await this.th.awaitAndClick(By.id("submit"))
     // Wait a sec
     await this.driver.sleep(2000)
   }
 
   private async activateAstra(): Promise<void> {
     // Open Appareance menu
-    await this.sh.awaitAndClick(By.id("menu-appearance"))
+    await this.th.awaitAndClick(By.id("menu-appearance"))
 
     // Activate
-    await this.sh.awaitAndClick(By.css(`a[aria-label="Activate Astra"]`))
+    await this.th.awaitAndClick(By.css(`a[aria-label="Activate Astra"]`))
   }
 
   private async connectAndActivateElementor(): Promise<void> {
-    await this.sh.awaitAndClick(By.css(".elementor-button"), 10000)
+    await this.th.awaitAndClick(By.css(".elementor-button"), 10000)
 
     try {
       await this.driver.wait(
@@ -283,12 +280,12 @@ export default class WPConfigTaskRunner {
 
   private async importTemplate(): Promise<void> {
     // Go to elmentor templates
-    await this.sh.awaitAndClick(By.id("menu-posts-elementor_library"))
+    await this.th.awaitAndClick(By.id("menu-posts-elementor_library"))
     // click import template trigger
     // await driver.sleep(2000) // give it a sec
-    await this.sh.awaitAndClick(By.id("elementor-import-template-trigger"))
+    await this.th.awaitAndClick(By.id("elementor-import-template-trigger"))
     // Enter tempalte
-    await this.sh.awaitAndSendKeys(
+    await this.th.awaitAndSendKeys(
       By.css("#elementor-import-template-form-inputs input"),
       [
         path.resolve(
@@ -299,7 +296,7 @@ export default class WPConfigTaskRunner {
       ]
     )
     // Submit
-    await this.sh.awaitAndClick(
+    await this.th.awaitAndClick(
       By.css(`#elementor-import-template-form-inputs input[type="submit"]`)
     )
   }
@@ -310,8 +307,8 @@ export default class WPConfigTaskRunner {
         until.elementLocated(By.css(".interstitial-wrapper")),
         2000
       )
-      await this.sh.awaitAndClick(By.id("details-button"))
-      await this.sh.awaitAndClick(By.id("proceed-link"))
+      await this.th.awaitAndClick(By.id("details-button"))
+      await this.th.awaitAndClick(By.id("proceed-link"))
 
       // tslint:disable-next-line: no-console
       console.log(
@@ -326,15 +323,16 @@ export default class WPConfigTaskRunner {
   private async loginElementor(): Promise<void> {
     await this.driver.get("https://my.elementor.com/login/?redirect_to=%2F")
     // Enter username
-    await this.sh.awaitAndSendKeys(By.id("login-input-email"), [
+    await this.th.awaitAndSendKeys(By.id("login-input-email"), [
       process.env.ELEMENTOR_LOGIN_USERNAME as string,
     ])
     // Enter password
-    await this.sh.awaitAndSendKeys(By.id("login-input-password"), [
+    await this.th.awaitAndSendKeys(By.id("login-input-password"), [
       process.env.ELEMENTOR_LOGIN_PASSWORD as string,
     ])
+    await this.driver.sleep(1000) // give it a sec
     // Log in
-    await this.sh.awaitAndClick(By.css(".elementor-button.elementor-size-md"))
+    await this.th.awaitAndClick(By.css(".elementor-button.elementor-size-md"))
     // Verify login
     await this.driver.wait(
       until.elementLocated(By.css(".e-account-header")),

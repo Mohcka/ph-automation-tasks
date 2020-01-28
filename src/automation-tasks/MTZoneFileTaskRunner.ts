@@ -1,6 +1,5 @@
 import ora, { Ora } from "ora"
 
-import SeleniumHelper from "../utils/SeleniumHelper"
 import TaskHelper from "../utils/TaskHelper"
 import { PipelineDataEntry, PipelineDataCollection } from "../DealDataFetcher"
 import { WebDriver, By, until } from "selenium-webdriver"
@@ -15,7 +14,6 @@ export default class MTZoneFileTaskRunner {
   private failedDeals: PipelineDataEntry[]
   private unverifiedDomains: string[]
 
-  private sh: SeleniumHelper
   private th: TaskHelper
 
   constructor(driver: WebDriver, dealsData: PipelineDataCollection) {
@@ -27,7 +25,6 @@ export default class MTZoneFileTaskRunner {
     this.failedDeals = []
     this.unverifiedDomains = []
 
-    this.sh = new SeleniumHelper(this.driver, this.waitTime)
     this.th = new TaskHelper(this.driver, this.waitTime)
   }
 
@@ -63,14 +60,14 @@ export default class MTZoneFileTaskRunner {
    */
   private async createZoneFile(currentDeal: PipelineDataEntry): Promise<void> {
     // Click Add A Domain
-    await this.sh.awaitAndClick(By.css(".island .btn--ac"))
+    await this.th.awaitAndClick(By.css(".island .btn--ac"))
 
     //  Enter domain and select already own
-    await this.sh.awaitAndSendKeys(By.id("domain"), [currentDeal.domain])
-    await this.sh.awaitAndClick(By.id("dontregister"))
+    await this.th.awaitAndSendKeys(By.id("domain"), [currentDeal.domain])
+    await this.th.awaitAndClick(By.id("dontregister"))
 
     // Submit
-    await this.sh.awaitAndClick(By.css(".btn-submit"))
+    await this.th.awaitAndClick(By.css(".btn-submit"))
 
     // Choose A Service
     // Select desired server
@@ -79,8 +76,8 @@ export default class MTZoneFileTaskRunner {
       this.waitTime
     )
     await this.driver.sleep(1000)
-    await this.sh.awaitAndClick(By.css(".fancyList-item input"))
-    await this.sh.awaitAndClick(By.css(".grid-row button"))
+    await this.th.awaitAndClick(By.css(".fancyList-item input"))
+    await this.th.awaitAndClick(By.css(".grid-row button"))
     // Grab txtValue
     await this.driver.wait(
       until.elementLocated(By.xpath(`//td[contains(text(), "mt-")]`)),
@@ -100,7 +97,7 @@ export default class MTZoneFileTaskRunner {
     while (attempts < limit) {
       try {
         await this.driver.sleep(10000)
-        await this.sh.awaitAndClick(By.id("verifyButton"))
+        await this.th.awaitAndClick(By.id("verifyButton"))
         await this.driver.wait(
           until.elementLocated(By.css(".welcomeBar-message")),
           2000
@@ -135,16 +132,16 @@ export default class MTZoneFileTaskRunner {
     await this.driver.switchTo().window(currentTabs[1])
 
     // search for domain to manage
-    await this.sh.awaitAndSendKeys(
+    await this.th.awaitAndSendKeys(
       By.css(`input.gb-form-control[placeholder="Search"]`),
       [domain]
     )
     await this.driver.sleep(2000)
-    await this.sh.awaitAndClick(
+    await this.th.awaitAndClick(
       By.xpath(`//table//a[contains(text(), "Manage")]`)
     )
     // enter DNS tab and provide the TXT record
-    await this.sh.awaitAndClick(By.css(".advanced-dns"))
+    await this.th.awaitAndClick(By.css(".advanced-dns"))
     // Set catagory as TXT
     await this.driver.wait(
       until.elementLocated(
@@ -154,11 +151,11 @@ export default class MTZoneFileTaskRunner {
     )
 
     await this.driver.sleep(2000)
-    await this.sh.awaitAndClick(
+    await this.th.awaitAndClick(
       By.xpath(`//p[contains(text(), "CNAME Record")]`)
     )
 
-    await this.sh.awaitAndClick(
+    await this.th.awaitAndClick(
       By.xpath(`//div[contains(text(), "TXT Record")]`)
     )
     await this.driver.sleep(250) // give it a sec
@@ -166,7 +163,7 @@ export default class MTZoneFileTaskRunner {
       .findElement(By.xpath(`//p[contains(text(), "URL Redirect Record")]`))
       .click()
 
-    await this.sh.awaitAndClick(
+    await this.th.awaitAndClick(
       By.xpath(`//div[contains(text(), "TXT Record")]`)
     )
     // Enter txt field values
@@ -174,6 +171,7 @@ export default class MTZoneFileTaskRunner {
     const txtFieldsEl = await this.driver.findElements(
       By.css(`input[name="txt"]`)
     )
+
     await txtFieldsEl[0].clear()
     await txtFieldsEl[0].sendKeys(txtRecord)
     await txtFieldsEl[1].clear()
@@ -193,10 +191,10 @@ export default class MTZoneFileTaskRunner {
     // Open page
     await this.driver.get("https://ac.mediatemple.net/login.mt")
     // Enter credentials
-    await this.sh.awaitAndSendKeys(By.id("primary_email"), [
+    await this.th.awaitAndSendKeys(By.id("primary_email"), [
       `${process.env.MEDIATEMPLE_EMAIL}`,
     ])
-    await this.sh.awaitAndSendKeys(By.id("ac_password"), [
+    await this.th.awaitAndSendKeys(By.id("ac_password"), [
       `${process.env.MEDIATEMPLE_PASS}`,
     ])
 

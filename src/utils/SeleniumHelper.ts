@@ -10,8 +10,8 @@ export interface WebdriverKeys
  * Collection of methods to help run webdriver tasks that are frequently used
  */
 export default class SeleniumHelper {
-  private driver: WebDriver
-  private waitTime: number
+  protected driver: WebDriver
+  protected waitTime: number
 
   /**
    *

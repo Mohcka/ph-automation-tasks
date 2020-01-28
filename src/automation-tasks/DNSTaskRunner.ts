@@ -29,7 +29,7 @@ export default class DNSTaskRunner {
     this.spinner = ora("Stand By...")
     this.spinner.color = "cyan"
 
-    this.sh = new SeleniumHelper(this.driver, this.waitTime)
+    this.th = new SeleniumHelper(this.driver, this.waitTime)
     this.th = new TaskHelper(this.driver, this.waitTime)
   }
 
@@ -38,6 +38,9 @@ export default class DNSTaskRunner {
    */
   public async runTask(): Promise<void> {
     await this.th.loginNC()
+
+    this.initializeSpinner()
+
     await this.applyNameCheapNameServers()
   }
 
@@ -45,7 +48,7 @@ export default class DNSTaskRunner {
    * Point domains for each of name servers
    */
   private async applyNameCheapNameServers() {
-    await this.sh.awaitAndClick(By.css(".domains"))
+    await this.th.awaitAndClick(By.css(".domains"))
 
     this.spinner.start()
 
@@ -54,31 +57,31 @@ export default class DNSTaskRunner {
       this.currentDeal = deal
       try {
         // search for domain to manage
-        await this.sh.awaitAndSendKeys(
+        await this.th.awaitAndSendKeys(
           By.css(`input.gb-form-control[placeholder="Search"]`),
           [this.currentDeal.domain]
         )
         await this.driver.sleep(2000)
-        await this.sh.awaitAndClick(
+        await this.th.awaitAndClick(
           By.xpath(`//table//a[contains(text(), "Manage")]`)
         )
         // Set name servers
-        await this.sh.awaitAndClick(
+        await this.th.awaitAndClick(
           By.css("div.nameservers-row a.select2-choice")
         )
-        await this.sh.awaitAndClick(
+        await this.th.awaitAndClick(
           By.xpath(`//div[contains(text(), "Custom DNS")]`)
         )
-        await this.sh.awaitAndSendKeys(By.css("#record0"), [
+        await this.th.awaitAndSendKeys(By.css("#record0"), [
           "ns1.mediatemple.net",
         ])
-        await this.sh.awaitAndSendKeys(By.css("#record1"), [
+        await this.th.awaitAndSendKeys(By.css("#record1"), [
           "ns2.mediatemple.net",
         ])
-        await this.sh.awaitAndClick(By.css(".save"))
+        await this.th.awaitAndClick(By.css(".save"))
         await this.driver.sleep(3000)
         // Go backto domain list
-        await this.sh.awaitAndClick(By.css(".domains"))
+        await this.th.awaitAndClick(By.css(".domains"))
       } catch (err) {
         this.failedDeals.push(this.currentDeal)
         console.log(err)
@@ -92,5 +95,14 @@ export default class DNSTaskRunner {
     this.spinner.stop()
 
     this.th.logCompletedFeedback(this.failedDeals)
+  }
+
+  /**
+   * Rev it up
+   */
+  private initializeSpinner(): void {
+    this.spinner = ora("Stand By...")
+    this.spinner.color = "cyan"
+    this.spinner.spinner = "dots"
   }
 }
