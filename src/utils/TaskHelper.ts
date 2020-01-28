@@ -4,23 +4,16 @@ import { PipelineDataEntry } from "../DealDataFetcher"
 
 import AsciiArt from "./AsciiArt"
 
-export default class TaskHelper {
-  private driver: WebDriver
-  private waitTime: number
-  private sh: SeleniumHelper
-
+export default class TaskHelper extends SeleniumHelper {
   constructor(driver: WebDriver, waitTime: number) {
-    this.driver = driver
-    this.waitTime = waitTime
-
-    this.sh = new SeleniumHelper(this.driver, this.waitTime)
+    super(driver, waitTime)
   }
 
   // * Plesk Helpers
 
   async pullUpDomainPageFor(domain: string) {
     // Enter Domain page
-    await this.sh.awaitAndClick(By.css(".nav-domains"))
+    await this.awaitAndClick(By.css(".nav-domains"))
     await this.driver.wait(
       until.elementLocated(By.id("domains-list-search-text-domainName")),
       this.waitTime
@@ -28,21 +21,20 @@ export default class TaskHelper {
     await this.driver
       .findElement(By.id("domains-list-search-text-domainName"))
       .clear()
-    await this.sh.awaitAndSendKeys(
-      By.id("domains-list-search-text-domainName"),
-      [domain]
-    )
+    await this.awaitAndSendKeys(By.id("domains-list-search-text-domainName"), [
+      domain,
+    ])
     await this.driver.findElement(By.css(".search-field em")).click()
 
     await this.driver.sleep(2000)
-    await this.sh.awaitAndClick(By.css("#domains-list-container .odd td a"))
+    await this.awaitAndClick(By.css("#domains-list-container .odd td a"))
   }
 
   public async loginPlesk() {
     // Enter plesk server
     await this.driver.get("https://dh52-ylwp.accessdomain.com:8443/")
 
-    await this.sh.awaitAndSendKeys(By.css("#loginSection-username"), [
+    await this.awaitAndSendKeys(By.css("#loginSection-username"), [
       `${process.env.PLESK_USERNAME}`,
     ])
 
@@ -62,15 +54,15 @@ export default class TaskHelper {
     // Enter login page
     await this.driver.get("https://ap.www.namecheap.com/")
     // Enter login and pass
-    await this.sh.awaitAndSendKeys(By.css(`.nc_username_required`), [
+    await this.awaitAndSendKeys(By.css(`.nc_username_required`), [
       `${process.env.NAMECHEAP_USERNAME}`,
     ])
-    await this.sh.awaitAndSendKeys(By.css(`.nc_password_required`), [
+    await this.awaitAndSendKeys(By.css(`.nc_password_required`), [
       `${process.env.NAMECHEAP_PASSWORD}`,
     ])
 
     // Submit
-    await this.sh.awaitAndClick(By.css(".nc_login_submit"))
+    await this.awaitAndClick(By.css(".nc_login_submit"))
   }
 
   /**
@@ -100,5 +92,3 @@ export default class TaskHelper {
     }
   }
 }
-
-
