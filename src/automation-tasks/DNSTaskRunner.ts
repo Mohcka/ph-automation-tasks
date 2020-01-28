@@ -1,6 +1,5 @@
 import { By, until, WebDriver } from "selenium-webdriver"
 
-import SeleniumHelper from "../utils/SeleniumHelper"
 import { PipelineDataEntry, PipelineDataCollection } from "../DealDataFetcher"
 import TaskHelper from "../utils/TaskHelper"
 import { Ora } from "ora"
@@ -14,7 +13,6 @@ export default class DNSTaskRunner {
   private dealsData: PipelineDataCollection
   private currentDeal: PipelineDataEntry // data of a single deal from the pipelinedeals api
   private failedDeals: PipelineDataCollection
-  private sh: SeleniumHelper
   private th: TaskHelper
 
   private spinner: Ora
@@ -29,7 +27,6 @@ export default class DNSTaskRunner {
     this.spinner = ora("Stand By...")
     this.spinner.color = "cyan"
 
-    this.th = new SeleniumHelper(this.driver, this.waitTime)
     this.th = new TaskHelper(this.driver, this.waitTime)
   }
 
@@ -37,7 +34,11 @@ export default class DNSTaskRunner {
    * Schedule webdriver to run through and point nameservers to the mediatemple
    */
   public async runTask(): Promise<void> {
-    await this.th.loginNC()
+    try {
+      await this.th.loginNC()
+    } catch (err) {
+      console.log("already logged in")
+    }
 
     this.initializeSpinner()
 
@@ -48,7 +49,7 @@ export default class DNSTaskRunner {
    * Point domains for each of name servers
    */
   private async applyNameCheapNameServers() {
-    await this.th.awaitAndClick(By.css(".domains"))
+    await this.driver.get("https://ap.www.namecheap.com/domains/list/")
 
     this.spinner.start()
 

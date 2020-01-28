@@ -38,9 +38,8 @@ class Main {
 Please select a buildout process.  All buildouts to run are received from the company_names.json file.
 If you already haven't done so, please enter the data into that file with the desired deals to proces buildouts for.
 1. Create DNS zonefiles
-2. Point Nameservers
-3. Website Purchase
-4. Buildout
+2. Website Purchase
+3. Buildout Wordpress Installation
 (Select a Number):`
     const choicePrompt: Answers<"choice"> = await prompts({
       type: "number",
@@ -62,15 +61,16 @@ If you already haven't done so, please enter the data into that file with the de
             this.driver,
             this.fetchedPLData
           ).runTask()
-          break
-
-        case 2:
           await new DNSTaskRunner(this.driver, this.fetchedPLData).runTask()
           break
-        case 3:
+
+        // case 2:
+        //   await new DNSTaskRunner(this.driver, this.fetchedPLData).runTask()
+        //   break
+        case 2:
           await new PrebuildoutTaskRunner(this.driver, this.fetchedPLData).runTask()
           break
-        case 4:
+        case 3:
           await new WPTaskRunner(this.driver, this.fetchedPLData).runTask()
           break
         default:
