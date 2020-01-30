@@ -94,7 +94,7 @@ export default class PrebuildoutTaskRunner {
     ])
     // Username
     await this.th.awaitAndSendKeys(By.id(`domainInfo-userName`), [
-      this.currentDeal.domain.match(/([a-z]*)\./)![1],
+      this.currentDeal.domain.match(/\d*([\w|\d]+)\./)![1],
     ])
     // Password
     await this.th.awaitAndSendKeys(By.id(`domainInfo-password`), [
@@ -113,6 +113,11 @@ export default class PrebuildoutTaskRunner {
 
   private async installWordpress(): Promise<void> {
     // Implying we're at the domains page
+    // Clear the toast alerts
+    this.driver.wait(until.elementLocated(By.id("asyncProgressBar")), 2000)
+    this.driver.executeScript(
+      `document.querySelector("#asyncProgressBar").style.display = "none"`
+    )
     // Enter domain of interest in search
     await this.driver.wait(
       until.elementLocated(By.id("domains-list-search-text-domainName")),
@@ -178,7 +183,7 @@ export default class PrebuildoutTaskRunner {
       method: "put",
       url: `${process.env.PIPELINE_DEALS_API_URL}/deals/${this.currentDeal.id}.json?api_key=${process.env.PIPELINE_DEALS_API_KEY}`,
       transformRequest: [
-        (data: any, headers: any) => {
+        (data: any, _headers: any) => {
           const transformedData = `deal[custom_fields[custom_label_1585894]]=${data["deal[custom_fields[custom_label_1585894]]"]}`
 
           return transformedData
