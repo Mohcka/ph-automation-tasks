@@ -1,10 +1,14 @@
+import ora, { Ora } from "ora"
+
 import SeleniumHelper from "./SeleniumHelper"
 import { WebDriver, By, until } from "selenium-webdriver"
-import { PipelineDataEntry } from "../DealDataFetcher"
+import { PipelineDataEntry, PipelineDataCollection } from "../DealDataFetcher"
 
 import AsciiArt from "./AsciiArt"
 
 export default class TaskHelper extends SeleniumHelper {
+  private spinner: Ora
+
   constructor(driver: WebDriver, waitTime: number) {
     super(driver, waitTime)
   }
@@ -55,10 +59,10 @@ export default class TaskHelper extends SeleniumHelper {
     await this.driver.get("https://ap.www.namecheap.com/")
     // Enter login and pass
     await this.awaitAndSendKeys(By.css(`.nc_username_required`), [
-      `${process.env.NAMECHEAP_USERNAME}`,
+      process.env.NAMECHEAP_USERNAME as string,
     ])
     await this.awaitAndSendKeys(By.css(`.nc_password_required`), [
-      `${process.env.NAMECHEAP_PASSWORD}`,
+      process.env.NAMECHEAP_PASSWORD as string,
     ])
 
     // Submit
@@ -90,5 +94,9 @@ export default class TaskHelper extends SeleniumHelper {
       // tslint:disable-next-line: no-console
       console.log(successMsg.green)
     }
+  }
+
+  public initializeSpinner(deals: PipelineDataCollection) {
+    this.spinner = ora("Stand By...")
   }
 }
