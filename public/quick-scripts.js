@@ -1,3 +1,4 @@
+/* eslint-disable no-undef */
 //* PIPELINE
 // Get business names from the pipelinedeals deals UI
 [...document.querySelectorAll(`td[data-column="deal_company_name"] a`)]
