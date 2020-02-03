@@ -40,7 +40,11 @@ export default class PrebuildoutTaskRunner {
 
     for (const deal of this.dealsData) {
       this.currentDeal = deal
-      this.spinner.text = `Currently Working on ${this.currentDeal.companyName} (${this.currentDeal.domain})`
+      this.spinner.text = `Currently Working on ${
+        this.currentDeal.companyName
+      } (${this.currentDeal.domain}) ${this.dealsData.indexOf(deal) + 1} of ${
+        this.dealsData.length
+      }`
       this.spinner.start()
 
       try {
@@ -114,9 +118,9 @@ export default class PrebuildoutTaskRunner {
   private async installWordpress(): Promise<void> {
     // Implying we're at the domains page
     // Clear the toast alerts
-    this.driver.wait(until.elementLocated(By.id("asyncProgressBar")), 2000)
+    this.driver.wait(until.elementLocated(By.css(".pul-toaster")), 2000)
     this.driver.executeScript(
-      `document.querySelector("#asyncProgressBar").style.display = "none"`
+      `[...document.querySelectorAll(".pul-toaster")].map(pulToaster => pulToaster.style.display = "none")`
     )
     // Enter domain of interest in search
     await this.driver.wait(
