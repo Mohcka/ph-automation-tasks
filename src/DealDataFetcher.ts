@@ -4,6 +4,13 @@ import ora, { Spinner, Ora } from "ora"
 
 import { company_names } from "./data/company_names.json"
 
+interface ICustomFields {
+  /**
+   * Domain name
+   */
+  custom_label_1454434: string
+}
+
 interface Entry {
   /**
    * Id for the pipeline deal
@@ -13,6 +20,9 @@ interface Entry {
   company: { name: string }
 }
 
+/**
+ * Array of pipeline data entries
+ */
 interface PLEntries extends Array<Entry> {}
 
 /**
