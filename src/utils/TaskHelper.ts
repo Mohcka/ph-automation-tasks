@@ -96,7 +96,20 @@ export default class TaskHelper extends SeleniumHelper {
     }
   }
 
-  public initializeSpinner(deals: PipelineDataCollection) {
+  /**
+   * Rev it up
+   */
+  public initializeSpinner(): void {
     this.spinner = ora("Stand By...")
+    this.spinner.color = "cyan"
+    this.spinner.spinner = "dots"
+    this.spinner.start()
+  }
+
+  /**
+   * Close all tabs for the web driver except for the initial one
+   */
+  public closeAllTabsButMain(){
+    // TODO: fill in logic to close all tabs for the web driver except for the initial one
   }
 }
