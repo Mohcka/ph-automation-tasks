@@ -37,7 +37,9 @@ export default class MTZoneFileTaskRunner {
 
     // Create Zonefiles
     for (const deal of this.dealsData) {
-      this.spinner.text = `Creating zonefile for: ${deal.companyName}`
+      this.spinner.text = `Creating zonefile for: ${
+        deal.companyName
+      } (${this.dealsData.indexOf(deal) + 1} of ${this.dealsData.length})`
 
       try {
         await this.createZoneFile(deal)
@@ -48,6 +50,9 @@ export default class MTZoneFileTaskRunner {
         await this.driver.get("https://ac.mediatemple.net/home.mt")
       }
     }
+
+    this.spinner.text = "ZF creations finished"
+    this.spinner.succeed()
 
     this.th.logCompletedFeedback(
       this.failedDeals,
@@ -209,5 +214,6 @@ export default class MTZoneFileTaskRunner {
     this.spinner = ora("Stand By...")
     this.spinner.color = "cyan"
     this.spinner.spinner = "dots"
+    this.spinner.start()
   }
 }
