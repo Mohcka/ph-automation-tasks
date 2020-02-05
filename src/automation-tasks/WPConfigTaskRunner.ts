@@ -1,7 +1,8 @@
 import path from "path"
 import { WebDriver, By, until } from "selenium-webdriver"
-import { Ora } from "ora"
-import ora = require("ora")
+import ora, { Ora } from "ora"
+
+import axios from "axios"
 
 import TemplateGenerator from "../template-generator"
 import { PipelineDataCollection, PipelineDataEntry } from "../DealDataFetcher"
@@ -16,6 +17,7 @@ export default class WPConfigTaskRunner {
   private driver: WebDriver
   private dealsData: PipelineDataCollection
   private currentDeal: PipelineDataEntry
+  private incompleteDeals: PipelineDataCollection
   private failedDeals: PipelineDataCollection
   private unsecruedDomains: PipelineDataCollection
 
@@ -30,6 +32,7 @@ export default class WPConfigTaskRunner {
     this.dealsData = plData
 
     this.failedDeals = []
+    this.incompleteDeals = []
     this.unsecruedDomains = []
 
     this.th = new TaskHelper(this.driver, this.waitTime)
@@ -59,6 +62,10 @@ export default class WPConfigTaskRunner {
     for (const deal of this.dealsData) {
       try {
         this.currentDeal = deal
+        if (this.currentDeal.webDesc.length < 0) {
+          this.incompleteDeals.push(this.currentDeal)
+          throw new Error("Web desc was not created yet")
+        }
         this.spinner.text = `Now working on ${deal.companyName}`
 
         // Login deal wordpress
@@ -87,12 +94,14 @@ export default class WPConfigTaskRunner {
             "Astra activation failed.  It may have already be installed".yellow
           )
         }
-        // Upload elementor
         // Creating homepage
         await this.createHomePage()
 
         // Set as homepage
-        await this.indexHomePage()
+        // await this.indexHomePage()
+
+        // Complete - set deal for quality check
+        await this.switchStageToQC()
         // Close tab and go back to plesk
         await this.restart()
       } catch (err) {
@@ -349,6 +358,9 @@ export default class WPConfigTaskRunner {
   }
 
   private logFailures(): void {
+    if (this.incompleteDeals.length > 0) {
+    }
+
     if (this.failedDeals.length > 0) {
       this.spinner.stop()
       // tslint:disable-next-line: no-console
@@ -367,5 +379,26 @@ export default class WPConfigTaskRunner {
         "All wordpress configurations have been succsefully completed ✓".green
       )
     }
+  }
+
+  /**
+   * Switch the pipeline deals status to Quality checks
+   */
+  private async switchStageToQC(): Promise<void> {
+    await axios({
+      method: "put",
+      url: `${process.env.PIPELINE_DEALS_API_URL}/deals/${this.currentDeal.id}.json?api_key=${process.env.PIPELINE_DEALS_API_KEY}`,
+      transformRequest: [
+        (data: any, _headers: any) => {
+          const qualityCheckProperty = data["deal[custom_fields[custom_label_1585894]]"]
+          const transformedData = `deal[custom_fields[custom_label_1585894]]=${qualityCheckProperty}`
+
+          return transformedData
+        },
+      ],
+      data: {
+        "deal[custom_fields[custom_label_1585894]]": 5713126, // 3 - Quality Check
+      },
+    })
   }
 }
