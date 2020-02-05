@@ -55,11 +55,10 @@ export interface PipelineDataCollection extends Array<PipelineDataEntry> {}
  */
 export default class DealDataFetcher {
   private static plData: PipelineDataCollection
+  private searchID: number
   private static idList: string
   private static spinner: Ora
 
-  // tslint:disable-next-line: no-empty
-  constructor() {}
 
   public static async fetchData(): Promise<PipelineDataCollection> {
     this.plData = []
@@ -113,5 +112,9 @@ export default class DealDataFetcher {
     this.spinner.succeed()
 
     return this.plData
+  }
+
+  public setSearchID(searchID: number): void {
+    this.searchID = searchID
   }
 }
