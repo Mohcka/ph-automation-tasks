@@ -15,6 +15,7 @@ import PLDataFetcher, { PipelineDataCollection } from "./src/DealDataFetcher"
 import DNSTaskRunner from "./src/automation-tasks/DNSTaskRunner"
 import PrebuildoutTaskRunner from "./src/automation-tasks/PrebuildoutTaskRunner"
 import WPTaskRunner from "./src/automation-tasks/WPConfigTaskRunner"
+import DealDataFetcher from "./src/DealDataFetcher"
 
 /**
  *
@@ -22,13 +23,18 @@ import WPTaskRunner from "./src/automation-tasks/WPConfigTaskRunner"
 class Main {
   private driver: WebDriver
   private choice: number
+
+
+  private dealFetcher: DealDataFetcher
   private fetchedPLData: PipelineDataCollection
 
   /**
    * Main driver for webtask automation
    */
   // tslint:disable-next-line: no-empty
-  constructor() {}
+  constructor() {
+    this.dealFetcher = new PLDataFetcher()
+  }
 
   /**
    * Begin web automation by giving the user a choice
