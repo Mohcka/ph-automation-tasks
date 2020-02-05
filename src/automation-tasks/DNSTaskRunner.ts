@@ -43,6 +43,9 @@ export default class DNSTaskRunner {
     this.initializeSpinner()
 
     await this.applyNameCheapNameServers()
+
+    this.spinner.text = "Finished"
+    this.spinner.succeed()
   }
 
   /**
@@ -50,8 +53,6 @@ export default class DNSTaskRunner {
    */
   private async applyNameCheapNameServers() {
     await this.driver.get("https://ap.www.namecheap.com/domains/list/")
-
-    this.spinner.start()
 
     for (const deal of this.dealsData) {
       this.spinner.text = `Currently pointing: ${deal.domain}`
@@ -105,5 +106,6 @@ export default class DNSTaskRunner {
     this.spinner = ora("Stand By...")
     this.spinner.color = "cyan"
     this.spinner.spinner = "dots"
+    this.spinner.start()
   }
 }
