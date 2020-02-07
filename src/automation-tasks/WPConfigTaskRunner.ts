@@ -66,7 +66,9 @@ export default class WPConfigTaskRunner {
           this.incompleteDeals.push(this.currentDeal)
           throw new Error("Web desc was not created yet")
         }
-        this.spinner.text = `Now working on ${deal.companyName}`
+        this.spinner.text = `Now working on ${
+          deal.companyName
+        } (${this.dealsData.indexOf(deal)} of ${this.dealsData.length})`
 
         // Login deal wordpress
         await this.loginWP()
@@ -160,7 +162,7 @@ export default class WPConfigTaskRunner {
       By.xpath(`//button[contains(text(), "Page Attributes")]`)
     )
     await this.th.awaitAndClick(By.css(`option[value="elementor_canvas"]`))
-    // publithis.th
+    // publish
     await this.th.awaitAndClick(By.css(".editor-post-publish-panel__toggle"))
     // Do it again!
     await this.driver.sleep(1000)
@@ -390,7 +392,8 @@ export default class WPConfigTaskRunner {
       url: `${process.env.PIPELINE_DEALS_API_URL}/deals/${this.currentDeal.id}.json?api_key=${process.env.PIPELINE_DEALS_API_KEY}`,
       transformRequest: [
         (data: any, _headers: any) => {
-          const qualityCheckProperty = data["deal[custom_fields[custom_label_1585894]]"]
+          const qualityCheckProperty =
+            data["deal[custom_fields[custom_label_1585894]]"]
           const transformedData = `deal[custom_fields[custom_label_1585894]]=${qualityCheckProperty}`
 
           return transformedData

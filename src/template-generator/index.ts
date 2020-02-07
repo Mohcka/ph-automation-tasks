@@ -14,6 +14,7 @@ interface ParsedPipelineEntry extends PipelineDataEntry {
   email: string
   field: string
   location: string
+  zipcode: string
   web_desc1: string
   web_desc2: string
   parsedKeywords: string[]
@@ -70,16 +71,20 @@ export default class TemplateGenerator {
             : "{FIELD}"
 
         let location = null
+        let zipcode = null
         if (
           deal.serviceArea != null &&
           deal.gmbAddress.match(/([A-z]+),? [A-Z]{2}/) != null
         ) {
           location = deal.gmbAddress.match(/([A-z]+),? [A-Z]{2}/)![0]
+          zipcode = deal.gmbAddress.match(/[0-9]{5}/)![0]
         } else {
           location = "{LOCATION}"
+          zipcode = "{ZIPCODE}"
         }
 
         this.parsedData.location = location
+        this.parsedData.zipcode = zipcode
 
         // * Descriptions
         this.parsedData.web_desc1 = this.parseDesc(
@@ -175,6 +180,7 @@ export default class TemplateGenerator {
     content = content.replace(/\${email}/g, data.email)
     content = content.replace(/\${field}/g, data.field)
     content = content.replace(/\${location}/g, data.location)
+    content = content.replace(/\${zipcode}/g, data.zipcode)
     content = content.replace(/\${web_desc_1}/g, data.web_desc1)
     content = content.replace(/\${web_desc_2}/g, data.web_desc2)
 

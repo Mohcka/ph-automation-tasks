@@ -2,7 +2,10 @@ import axios from "axios"
 import colors from "colors"
 import ora, { Spinner, Ora } from "ora"
 
+import NCApiManager, { INamecheapDomain } from "./nc-api-manager"
+
 import { company_names } from "./data/company_names.json"
+import fitlerList from "./data/pl_search_ids.json"
 
 interface ICustomFields {
   /**
@@ -54,18 +57,27 @@ export interface PipelineDataCollection extends Array<PipelineDataEntry> {}
  * from the pipeline deals api
  */
 export default class DealDataFetcher {
+  private static ncApi: NCApiManager = new NCApiManager(
+    process.env.NC_APIKEY as string,
+    process.env.NC_USER as string,
+    process.env.NC_IP as string
+  )
+
   private static plData: PipelineDataCollection
   private searchID: number
   private static idList: string
   private static spinner: Ora
 
-
-  public static async fetchData(): Promise<PipelineDataCollection> {
+  /**
+   *
+   * @param searchID The pipelinedeals registered search ID used to fetch a list of deals from
+   *                 a filtered list
+   */
+  public static async fetchData(searchParameters: {
+    searchID?: number
+    dealIDs?: string
+  }): Promise<PipelineDataEntry[]> {
     this.plData = []
-    // Parse ids
-    this.idList = company_names
-      .map(listItem => listItem.match(/- (\d+)/)![1])
-      .join(",")
     // initialize Spinner
     this.spinner = ora("Stand By...")
     this.spinner.color = "cyan"
@@ -73,9 +85,13 @@ export default class DealDataFetcher {
     this.spinner.spinner = "dots6"
     this.spinner.start()
 
+    const searchQuery = searchParameters.dealIDs
+      ? `conditions[deal_id]=${searchParameters.dealIDs}`
+      : `search_id=${searchParameters.searchID}`
+
     await axios
       .get(
-        `${process.env.PIPELINE_DEALS_API_URL}/deals.json?api_key=${process.env.PIPELINE_DEALS_API_KEY}&conditions[deal_id]=${this.idList}`
+        `${process.env.PIPELINE_DEALS_API_URL}/deals.json?api_key=${process.env.PIPELINE_DEALS_API_KEY}&search_id=${searchParameters.searchID}`
       )
       .then(res => {
         // console.log(res.data.entries.length) //* for debugging
@@ -108,13 +124,78 @@ export default class DealDataFetcher {
         }
       })
 
-    this.spinner.text = "Deals data has been fetched".green
-    this.spinner.succeed()
+    
 
     return this.plData
   }
 
-  public setSearchID(searchID: number): void {
-    this.searchID = searchID
+  /**
+   * Filter deals to the ones that are registered under namecheap
+   */
+  public static async getFilteredDeals(
+    plData: PipelineDataCollection
+  ): Promise<PipelineDataEntry[]> {
+    const filteredDeals: PipelineDataEntry[] = []
+    const domains: INamecheapDomain[] = await this.ncApi.getAllDomains()
+
+    for (const deal of plData) {
+      // The NC Domain that matched the domain in the PL data entry
+      const foundMatch = domains.find(domain => {
+        // If the deals domain matches the domain from NC
+        // it's valid and is ok to be processeds
+        return domain.Name === deal.domain
+      })
+      // Push deal to stack if it's domain is registered
+      if (foundMatch) filteredDeals.push(deal)
+      // console.log(deal.domain)
+      // console.log(foundMatch)
+    }
+
+    console.log(filteredDeals.length)
+    return filteredDeals
+  }
+
+  /**
+   * Fetches all deals from Pipeline that have domains registered with the provided
+   * Namecheap user.
+   */
+  public static async getDealsWithRegisteredDomains(): Promise<
+    PipelineDataEntry[]
+  > {
+    const deals = await this.fetchData({ searchID: fitlerList.websitePurchase })
+    const filteredDeals = await this.getFilteredDeals(deals)
+
+    this.spinner.text = `Found ${ filteredDeals.length} with registered domains`.green
+    this.spinner.succeed()
+
+    return await filteredDeals
+  }
+
+  /**
+   * Searches for and returns a list of deals from the buildout list
+   * where all the desired data is found within the custom fields (currently we're looking for
+   * just the Web description field not to be empty)
+   */
+  public static async getCompleteDeals(): Promise<PipelineDataEntry[]> {
+    const deals = await this.fetchData({ searchID: fitlerList.buildout })
+
+    const completeDeals = deals.filter(deal => {
+      return deal.webDesc !== null
+    })
+
+    this.spinner.text = `Found ${completeDeals.length} with valid Data`.green
+    this.spinner.succeed()
+
+    return completeDeals
+  }
+
+  /**
+   * Returns a comma seperrated string of the unique ids of pipeline deals
+   * to fetch, using data found from the company_names.json
+   */
+  public static getDealIDsList(): string {
+    return company_names
+      .map(listItem => listItem.match(/- (\d+)/)![1])
+      .join(",")
   }
 }

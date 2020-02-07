@@ -17,13 +17,14 @@ import PrebuildoutTaskRunner from "./src/automation-tasks/PrebuildoutTaskRunner"
 import WPTaskRunner from "./src/automation-tasks/WPConfigTaskRunner"
 import DealDataFetcher from "./src/DealDataFetcher"
 
+import searchIDs from "./src/data/pl_search_ids.json"
+
 /**
  *
  */
 class Main {
   private driver: WebDriver
   private choice: number
-
 
   private dealFetcher: DealDataFetcher
   private fetchedPLData: PipelineDataCollection
@@ -55,28 +56,28 @@ If you already haven't done so, please enter the data into that file with the de
 
     this.choice = choicePrompt.choice
     // acquire data and create webdriver
-    this.fetchedPLData = await PLDataFetcher.fetchData()
 
     await this.createWebDriver()
 
     try {
       switch (this.choice) {
         case 1:
-          // tslint:disable-next-line: no-console
+          this.fetchedPLData = await PLDataFetcher.getDealsWithRegisteredDomains()
           await new MTZoneFileTaskRunner(
             this.driver,
             this.fetchedPLData
           ).runTask()
           await new DNSTaskRunner(this.driver, this.fetchedPLData).runTask()
           break
-
-        // case 2:
-        //   await new DNSTaskRunner(this.driver, this.fetchedPLData).runTask()
-        //   break
         case 2:
-          await new PrebuildoutTaskRunner(this.driver, this.fetchedPLData).runTask()
+          this.fetchedPLData = await PLDataFetcher.getDealsWithRegisteredDomains()
+          await new PrebuildoutTaskRunner(
+            this.driver,
+            this.fetchedPLData
+          ).runTask()
           break
         case 3:
+          this.fetchedPLData = await PLDataFetcher.getCompleteDeals()
           await new WPTaskRunner(this.driver, this.fetchedPLData).runTask()
           break
         default:

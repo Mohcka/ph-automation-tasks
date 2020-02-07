@@ -207,6 +207,10 @@ export default class MTZoneFileTaskRunner {
     await this.driver.findElement(By.css(".btn--ac")).click()
   }
 
+  private async restartProcess(): Promise<void> {
+    await this.driver.get("https://ac.mediatemple.net/home.mt")
+  }
+
   /**
    * Rev it up
    */
