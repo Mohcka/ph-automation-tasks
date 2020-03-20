@@ -68,7 +68,7 @@ export default class WPConfigTaskRunner {
         }
         this.spinner.text = `Now working on ${
           deal.companyName
-        } (${this.dealsData.indexOf(deal)} of ${this.dealsData.length})`
+        } (${this.dealsData.indexOf(deal) + 1} of ${this.dealsData.length})`
 
         // Login deal wordpress
         await this.loginWP()
@@ -326,9 +326,9 @@ export default class WPConfigTaskRunner {
         `${this.currentDeal.companyName} (${this.currentDeal.domain}) was not secured`
           .red
       )
-    } catch (err) {
       this.unsecruedDomains.push(this.currentDeal)
-    }
+      // tslint:disable-next-line: no-empty
+    } catch (err) {}
   }
 
   private async loginElementor(): Promise<void> {
@@ -369,8 +369,9 @@ export default class WPConfigTaskRunner {
       console.log(`The following deals have failed:`.yellow)
       // tslint:disable-next-line: no-console
       console.log(
-        this.failedDeals.map(failedDeal => failedDeal.companyName).join(`\n`)
-          .red
+        this.failedDeals
+          .map(failedDeal => `${failedDeal.companyName} (${failedDeal.domain})`)
+          .join(`\n`).red
       )
     } else {
       this.spinner.succeed()

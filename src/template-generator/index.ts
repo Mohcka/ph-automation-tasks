@@ -39,7 +39,6 @@ export default class TemplateGenerator {
     this.gsce = google.customsearch("v1")
     // fetch keyword summarry from keywords and descriptions spreadsheets
     this.gsheetsKandDData = await KeywordDataFetcher.fetchKeysAndDescs()
-
     for (const deal of this.dealsData) {
       try {
         // Parsing keywords for template
@@ -76,8 +75,14 @@ export default class TemplateGenerator {
           deal.serviceArea != null &&
           deal.gmbAddress.match(/([A-z]+),? [A-Z]{2}/) != null
         ) {
-          location = deal.gmbAddress.match(/([A-z]+),? [A-Z]{2}/)![0]
-          zipcode = deal.gmbAddress.match(/[0-9]{5}/)![0]
+          location =
+            deal.gmbAddress.match(/([A-z]+),? [A-Z]{2}/) != null
+              ? deal.gmbAddress.match(/([A-z]+),? [A-Z]{2}/)![0]
+              : "{LOCATION}"
+          zipcode =
+            deal.gmbAddress.match(/[0-9]{5}/) != null
+              ? deal.gmbAddress.match(/[0-9]{5}/)![0]
+              : "{ZIPCODE}"
         } else {
           location = "{LOCATION}"
           zipcode = "{ZIPCODE}"
@@ -115,8 +120,8 @@ export default class TemplateGenerator {
         // Once all the info has been input and parsed into data, enter the content into the template
         this.enterContent(this.parsedData)
       } catch (err) {
-        // console.log("ERR:")
-        // console.log(err)
+        console.log("ERR:")
+        console.log(err)
 
         this.writeError(err, { companyName: deal.companyName })
       }
@@ -125,7 +130,7 @@ export default class TemplateGenerator {
     console.log("Templates successfully generated ✓".green)
   }
 
-  /**
+  /**Y
    * Prases the description pulled from PLD, will use the standard description if it exists,
    * if it doesnt, will attempt to use the FB description. Failsafes to a default filler
    * @param {String} desc Standard website description
@@ -259,6 +264,7 @@ export default class TemplateGenerator {
     //   `templates/${slugify(data.companyName)}/template.json`,
     //   content.trim()
     // )
+
     fs.writeFileSync(
       path.resolve(
         "templates",

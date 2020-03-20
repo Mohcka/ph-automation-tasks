@@ -46,7 +46,14 @@ export default class MTZoneFileTaskRunner {
       } catch (err) {
         console.log(err)
         this.failedDeals.push(deal)
+        // close all tabs but main
+        const windows = await this.driver.getAllWindowHandles()
+        if (windows.length > 1) {
+          this.driver.close()
 
+          this.driver.switchTo().window(windows[0])
+        }
+        // Go back to main page
         await this.driver.get("https://ac.mediatemple.net/home.mt")
       }
     }

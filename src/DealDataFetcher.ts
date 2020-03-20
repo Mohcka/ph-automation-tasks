@@ -165,7 +165,7 @@ export default class DealDataFetcher {
     const deals = await this.fetchData({ searchID: fitlerList.websitePurchase })
     const filteredDeals = await this.getFilteredDeals(deals)
 
-    this.spinner.text = `Found ${ filteredDeals.length} with registered domains`.green
+    this.spinner.text = `Found ${ filteredDeals.length} deals with registered domains`.green
     this.spinner.succeed()
 
     return await filteredDeals
@@ -183,7 +183,7 @@ export default class DealDataFetcher {
       return deal.webDesc !== null
     })
 
-    this.spinner.text = `Found ${completeDeals.length} with valid Data`.green
+    this.spinner.text = `Found ${completeDeals.length} deals with valid Data`.green
     this.spinner.succeed()
 
     return completeDeals
