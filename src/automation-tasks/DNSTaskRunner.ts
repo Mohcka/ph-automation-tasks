@@ -55,7 +55,9 @@ export default class DNSTaskRunner {
     await this.driver.get("https://ap.www.namecheap.com/domains/list/")
 
     for (const deal of this.dealsData) {
-      this.spinner.text = `Currently pointing: ${deal.domain}`
+      this.spinner.text = `Currently pointing: ${
+        deal.domain
+      } (${this.dealsData.indexOf(deal)} of ${this.dealsData.length})`
       this.currentDeal = deal
       try {
         // search for domain to manage
